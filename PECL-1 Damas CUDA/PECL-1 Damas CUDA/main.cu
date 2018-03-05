@@ -22,6 +22,6 @@ int main() {
 		}
 		system("cls");
 	} while (opc != 0);
-	cout << " Has Salido del juego Amigo espero que te gute CUDA ya que este juego lo patrocinan CUDA y Nvidia !!" << endl;
+	cout << " Has Salido del juego Amigo espero que te guste CUDA ya que este juego lo patrocinan CUDA y Nvidia !!" << endl;
 	return EXIT_SUCCESS;
 }
