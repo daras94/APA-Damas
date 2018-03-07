@@ -303,6 +303,8 @@ c:\program files\nvidia gpu computing toolkit\cuda\v8.0\include\host_defines.h
 c:\program files\nvidia gpu computing toolkit\cuda\v8.0\include\vector_functions.h
 c:\program files\nvidia gpu computing toolkit\cuda\v8.0\include\device_launch_parameters.h
 c:\program files\nvidia gpu computing toolkit\cuda\v8.0\include\vector_types.h
+c:\users\david\documents\apa programacion\apa-damas\pecl-1 damas cuda\pecl-1 damas cuda\main.cuh
+c:\users\david\documents\apa programacion\apa-damas\pecl-1 damas cuda\pecl-1 damas cuda\Util.cuh
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include\device_launch_parameters.h
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream
@@ -384,3 +386,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xfacet
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\system_error
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cerrno
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\share.h
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iomanip
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xlocmon
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xloctime
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\ctime
