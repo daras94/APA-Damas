@@ -9,7 +9,7 @@
 info_gpu getCofigPlay(int devian, cudaDeviceProp *deviceProp) {
 	info_gpu myConfGpu;
 	cudaSetDevice(devian);		// Establecemos con que GPU queremos realizar la configuracion en funcion de disponer.
-	cudaGetDeviceProperties(deviceProp, devian);
+	//cudaGetDeviceProperties(deviceProp, devian);
 	myConfGpu->numThreadMaxPerSM = deviceProp->maxThreadsPerMultiProcessor;
 	myConfGpu->numThreadMasPerBlock = deviceProp->maxThreadsPerBlock;
 	myConfGpu->numRegPerBlock = deviceProp->regsPerBlock;
