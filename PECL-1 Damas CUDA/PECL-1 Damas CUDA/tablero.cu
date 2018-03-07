@@ -28,10 +28,9 @@ void setGpuForPlay(cudaDeviceProp *devProp) {
 		string errorMss = "La GPU devolvio el error " ANSI_COLOR_GREEN + to_string(error_code) + ANSI_COLOR_RESET + ": \n\t -> " + cudaGetErrorString(error_code);
 		ERROR_MSS(errorMss); // Retornamos un mensaje de error.	
 		system("pause");
-	}
-	else {
+	} else {
 		bool isPlay = false;
-		do {
+		inicio:
 			system("cls");
 			cout << "/***************************************************************************************/" << endl;
 			cout << "/*  +--> " << ANSI_COLOR_CYAN "Menu de configuracion de partida:" ANSI_COLOR_RESET << setw(47) << "*/" << endl;
@@ -49,17 +48,18 @@ void setGpuForPlay(cudaDeviceProp *devProp) {
 				cout << "/*  ---------------------------------------------------------------------------------  */" << endl;
 				cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Selecione una GPU para jugar." << setw(47) << "*/" << endl;
 			} else {
-				info_gpu myConfGpu = getCofigPlay(gpuOpc, devProp); // hay un error casca tengo que mirrarlo.
-				// ME He quedado trabajando aqui falta la parte de codigo de las tres opciones de configuracion de codigo pero me estoy sobando y es hora de dormir ya.
+				info_gpu myConfGpu = getCofigPlay(gpuOpc, devProp); 
+				
+				//goto finConfGpu;
 			}
 			cout << "/***************************************************************************************/" << endl;
 			cout << " - Selecione una opcion para juegar (" ANSI_COLOR_GREEN "Pulse 0 para salir de la configuracion" ANSI_COLOR_RESET "): ";
 			cin >> gpuOpc;		// Entrada de texto por teclado.
 			isPlay = (gpuOpc > 0 && gpuOpc <= deviceCount + 1) ? true : false;
-			if (gpuOpc != 0) {
+			if (gpuOpc != 0 && !isPlay) {
 				ERROR_MSS("Error opcion de juego introducida no es valida.");
 			}
-		} while (gpuOpc != 0 && !isPlay);
-
+			goto inicio;
+			//finConfGpu:
 	}
 }
