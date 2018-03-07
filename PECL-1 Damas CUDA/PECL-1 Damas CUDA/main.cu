@@ -7,6 +7,7 @@ int main() {
 	SetConsoleTitle("Damas BOM for CUDA");
 	int opc, dev;						// Es el valor de la opcion a usar 
 	cudaDeviceProp devProp;				// struct de carrasteristicas de la GPU.
+	info_gpu infoMyGPU = { NULL };
 	do {
 		system("cls");					// Limpiamos el pront
 		cout << "/***************************************************************************************/" << endl;
@@ -24,7 +25,7 @@ int main() {
 		system("cls");					// Limpiamos el pront
 		switch (opc) {
 			case 1:
-				setGpuForPlay(&devProp);
+				setGpuForPlay(&devProp, &infoMyGPU);
 				break;
 			default:
 				if (opc != 0) {

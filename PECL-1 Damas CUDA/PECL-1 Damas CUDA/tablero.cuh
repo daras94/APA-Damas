@@ -14,10 +14,8 @@ typedef struct InfoGPU {
 	size_t sharedMemPerBlock;
 	double maxDimThreadBlock[NUM_DIMENSION];
 	double maxDimGridSize[NUM_DIMENSION];
-} *info_gpu;
-
-// Declaracion de varibales globales.
+} info_gpu;
 
 // Declaracion de funciones y metodos.
-info_gpu getCofigPlay(int devian, cudaDeviceProp *deviceProp);
-void setGpuForPlay(cudaDeviceProp *devProp);
+void getCofigPlay(int devian, cudaDeviceProp *deviceProp, info_gpu *myConfGpu);
+void setGpuForPlay(cudaDeviceProp *devProp, info_gpu *myConfGpu);
