@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="main.cu" />
+    <CudaCompile Include="tablero.cu">
+      <Filter>Juego</Filter>
+    </CudaCompile>
+    <CudaCompile Include="UtilGPU.cu">
+      <Filter>Utiles</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.cuh" />
+    <ClInclude Include="tablero.cuh">
+      <Filter>Juego</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilGPU.cuh">
+      <Filter>Utiles</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCarasteristic.h">
+      <Filter>Utiles</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utiles">
+      <UniqueIdentifier>{d06443c8-26be-442a-9fce-92f6fc0c3a21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juego">
+      <UniqueIdentifier>{f767891b-c2cf-4851-a78e-72e8abb94e02}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GPUCarasteristic.cpp">
+      <Filter>Utiles</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

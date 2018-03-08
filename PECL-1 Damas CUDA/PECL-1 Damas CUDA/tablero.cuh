@@ -6,6 +6,9 @@
 #define TAM_TESELA 16		// tesela mas optima.
 #define NUM_DIMENSION 3     // Numero de dimesiones posibles en la GPU.
 
+// Declaracion de variables globales.
+
+
 // Declaracion de strut para alamacenar info gpu para su configuracion
 typedef struct InfoGPU {
 	double numThreadMaxPerSM;
@@ -18,4 +21,4 @@ typedef struct InfoGPU {
 
 // Declaracion de funciones y metodos.
 void getCofigPlay(int devian, cudaDeviceProp *deviceProp, info_gpu *myConfGpu);
-void setGpuForPlay(cudaDeviceProp *devProp, info_gpu *myConfGpu);
+void setGpuForPlayAuto(cudaDeviceProp *devProp, info_gpu *myConfGpu, int deviceCurrent);
