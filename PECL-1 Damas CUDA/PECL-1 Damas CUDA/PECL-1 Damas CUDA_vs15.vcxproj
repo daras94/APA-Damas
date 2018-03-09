@@ -159,11 +159,13 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="GPUCarasteristic.h" />
     <ClInclude Include="main.cuh" />
+    <ClInclude Include="Persistencia.h" />
     <ClInclude Include="tablero.cuh" />
     <ClInclude Include="UtilGPU.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GPUCarasteristic.cpp" />
+    <ClCompile Include="Persistencia.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

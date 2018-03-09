@@ -6,7 +6,8 @@
 int main() {
 	SetConsoleTitle("Damas BOM for CUDA");
 	getCofigPlay(selectGPU, &devProp, &infoMyGPU);						// obtenemos los parametros de la gpu para realizar la configuracion de la gpu.
-	int opc;															// Es el valor de la opcion a usar 
+	int opc,  dificultad;										        // Es el valor de la opcion a usar y la doficultad de juego. 
+	double numThread;													// El numero de hilos totales de la matriz escogida.
 	do {
 		system("cls");					// Limpiamos el pront
 		cout << "/***************************************************************************************/" << endl;
@@ -25,7 +26,9 @@ int main() {
 		cin >> opc;						// Entrada de texto por teclado.
 		switch (opc) {
 			case 1:
-				setGpuForPlayAuto(&devProp, &infoMyGPU, selectGPU);			// Llamamos a establecer la configuracion de la GPU.
+				numThread = setGpuForPlayAuto(&devProp, &infoMyGPU, selectGPU);			// Llamamos a establecer la configuracion de la GPU.
+				dificultad = setDificultad();
+				playDamas(numThread, new int[(int)numThread], &infoMyGPU, dificultad);
 				break;
 			case 2: 
 

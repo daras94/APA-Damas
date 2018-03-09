@@ -1,2 +1,2 @@
-#TargetFrameworkVersion=v4.0:PlatformToolSet=v120:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit
-Debug|Win32|C:\Users\Daniel\Documents\Visual Studio 2013\Projects\PECL1_Kernel\PECL1 Kernel\|
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v140:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=8.1
+Debug|Win32|H:\Documentos\Mis Estudios\UAH\GII\3º de Carrera\2º Cuatrimestre\Aplicacion Programacion Avanzada\laboratorio\Practicas\PECL-1 CUDA\WorkSpace\APA-Damas\PECL1_Kernel\PECL1 Kernel\|

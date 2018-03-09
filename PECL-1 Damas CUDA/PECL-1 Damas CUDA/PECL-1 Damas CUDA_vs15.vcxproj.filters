@@ -20,6 +20,9 @@
     <ClInclude Include="UtilGPU.cuh">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="Persistencia.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Juego">
@@ -31,6 +34,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GPUCarasteristic.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Persistencia.cpp">
       <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>

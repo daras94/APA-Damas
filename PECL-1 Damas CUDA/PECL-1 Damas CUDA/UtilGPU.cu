@@ -1,8 +1,5 @@
 #include "UtilGPU.cuh"
 
-
-cudaError_t cudaStatus;
-
 /*
 	Transfiere el contenoido de la mmemoria de la GPU a la memoria, Los Argumentos 
 	son los siguientes y retorna el codigo de error en caso de error
@@ -10,9 +7,9 @@ cudaError_t cudaStatus;
 		- dev  =  puntero a enteros usado para tranferir a la GPU.
 		- size =  devuelve el tamaño del valor a transferir.
 */
-cudaError_t getCudaMalloc(int *c,  int *dev, unsigned int size) {
+cudaError_t setCudaMemcpy(int *c,  int *dev, unsigned int size) {
 	// Copy output vector from GPU buffer to host memory.
-	cudaStatus = cudaMemcpy(c, dev, size * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaError_t cudaStatus = cudaMemcpy(c, dev, size * sizeof(int), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess) {
 		ERROR_MSS("Fallo el la operacion cudaMemcpy !!");
 		fprintf(stderr, "cudaMemcpy failed!");
@@ -33,7 +30,7 @@ cudaError_t getCudaMalloc(int *c,  int *dev, unsigned int size) {
 */
 cudaError_t setCudaMalloc(int *dev, unsigned int size) {
 	// Allocate GPU buffers for three vectors (two input, one output)    .
-	cudaStatus = cudaMalloc((void**)&dev, size * sizeof(int));
+	cudaError_t cudaStatus = cudaMalloc((void**)&dev, size * sizeof(int));
 	if (cudaStatus != cudaSuccess) {
 		ERROR_MSS("Fallo el la operacion cudaMalloc !!");
 		fprintf(stderr, "cudaMalloc failed!");
