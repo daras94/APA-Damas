@@ -7,18 +7,36 @@
 		- dev  =  puntero a enteros usado para tranferir a la GPU.
 		- size =  devuelve el tamaño del valor a transferir.
 */
-cudaError_t setCudaMemcpy(int *c,  int *dev, unsigned int size) {
+void setCudaMemcpyToHost(long*& c, long*& dev, int size) {
 	// Copy output vector from GPU buffer to host memory.
-	cudaError_t cudaStatus = cudaMemcpy(c, dev, size * sizeof(int), cudaMemcpyDeviceToHost);
+	cudaError_t cudaStatus = cudaMemcpy(c, dev, size * sizeof(long), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess) {
-		ERROR_MSS("Fallo el la operacion cudaMemcpy !!");
-		fprintf(stderr, "cudaMemcpy failed!");
+		ERROR_MSS("Fallo el la operacion cudaMemcpy Device to Host!!");
+		fprintf(stderr, cudaGetErrorString(cudaStatus));
 		goto Error;
 	}
-	// Saltamos a erro y liberamos la memoria.
+	// Saltamos a erroe y liberamos la memoria.
+	return;
 	Error:
 		cudaFree(dev);
-		return cudaStatus;
+		cout << endl;
+		system("pause");
+}
+
+void setCudaMemcpyToDevice(long*& c, long*& dev, int size) {
+	// Copy output vector from GPU buffer to host memory.
+	cudaError_t cudaStatus = cudaMemcpy(c, dev, size * sizeof(long), cudaMemcpyHostToDevice);
+	if (cudaStatus != cudaSuccess) {
+		ERROR_MSS("Fallo el la operacion cudaMemcpy Host to Device!!");
+		fprintf(stderr, cudaGetErrorString(cudaStatus));
+		goto Error;
+	}
+	// Saltamos a erroe y liberamos la memoria.
+	return;
+Error:
+	cudaFree(dev);
+	cout << endl;
+	system("pause");
 }
 
 /*
@@ -28,16 +46,18 @@ cudaError_t setCudaMemcpy(int *c,  int *dev, unsigned int size) {
 		- dev  =  puntero a enteros usado para tranferir a la GPU.
 		- size =  devuelve el tamaño del valor a transferir.
 */
-cudaError_t setCudaMalloc(int *dev, unsigned int size) {
+void setCudaMalloc(long*& dev, int size) {
 	// Allocate GPU buffers for three vectors (two input, one output)    .
-	cudaError_t cudaStatus = cudaMalloc((void**)&dev, size * sizeof(int));
+	cudaError_t cudaStatus = cudaMalloc((void**)&dev, size * sizeof(long));
 	if (cudaStatus != cudaSuccess) {
 		ERROR_MSS("Fallo el la operacion cudaMalloc !!");
-		fprintf(stderr, "cudaMalloc failed!");
+		fprintf(stderr, cudaGetErrorString(cudaStatus));
 		goto Error;
 	}
-	// Saltamos a erro y liberamos la memoria.
+	// Saltamos a error y liberamos la memoria.
+	return;
 Error:
-	cudaFree(dev);
-	return cudaStatus;
+	cudaFree(&dev);
+	cout << endl;
+	system("pause");
 }

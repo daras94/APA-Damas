@@ -17,7 +17,7 @@ int main() {
 		cout << "/*  " ANSI_COLOR_MAGENTA "1" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU."		   << setw(21) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "2" ANSI_COLOR_RESET ") - Iniciar paratida establecer configuracion de tablero de forma manual." << setw(11) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "3" ANSI_COLOR_RESET ") - Iniciar partida damas interfaces grafica."							   << setw(39) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "4" ANSI_COLOR_RESET ") - Ver Carateristicas del Hardware de que dispones."					   << setw(32) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "4" ANSI_COLOR_RESET ") - Ver Carateristicas del Hardware de que dispones."					   << setw(30) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "5" ANSI_COLOR_RESET ") - Selecionar configuracion de otra GPU disponible."                      << setw(45) << "*/" << endl;
 		cout << "/*" << setw(87) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
@@ -28,7 +28,7 @@ int main() {
 			case 1:
 				numThread = setGpuForPlayAuto(&devProp, &infoMyGPU, selectGPU);			// Llamamos a establecer la configuracion de la GPU.
 				dificultad = setDificultad();
-				playDamas(numThread, new int[(int)numThread], &infoMyGPU, dificultad);
+				playDamas(numThread, &infoMyGPU, dificultad);
 				break;
 			case 2: 
 

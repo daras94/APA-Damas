@@ -1,4 +1,4 @@
-#include "tablero.cuh"
+ï»¿#include "tablero.cuh"
 
 /*
 	Recupera las carrasteristicas nesesarias para realizar la configuracion del tablero.
@@ -21,7 +21,7 @@ void getCofigPlay(int devian, cudaDeviceProp *deviceProp, info_gpu *myConfGpu) {
 }
 
 double setGpuForPlayAuto(cudaDeviceProp *devProp,  info_gpu *myConfGpu, int deviceCurrent) {
-	double *dimTamblero;
+	double *dimTamblero, numThread;
 	int  gpuOpc;
 	do {
 		system("cls");
@@ -32,16 +32,16 @@ double setGpuForPlayAuto(cudaDeviceProp *devProp,  info_gpu *myConfGpu, int devi
 			string modelGPU = devProp->name;
 			cout << "/*  " ANSI_COLOR_MAGENTA "GPU " << deviceCurrent << ANSI_COLOR_RESET ") - " << modelGPU << setw(76 - modelGPU.length()) << "*/" << endl;
 			cout << "/*  ---------------------------------------------------------------------------------  */" << endl;
-			double numThread = myConfGpu->maxDimThreadBlock[1];
+			numThread = myConfGpu->maxDimThreadBlock[1];
 			dimTamblero = new double[NUM_DIMENSION] { 2, 4, 8 };
 			for (int i = 0; i < 3; i++) {
 				dimTamblero[i] = numThread / dimTamblero[i];
-				cout << "/*\t" ANSI_COLOR_MAGENTA << (i + 1) << ANSI_COLOR_RESET ") - Disponible tablero de juego de " ANSI_COLOR_GREEN << (dimTamblero[i] / TAM_TESELA) << "x" << (dimTamblero[i] / TAM_TESELA) << ANSI_COLOR_RESET << " " << dimTamblero[i] << " Threads" << setw(40) << "*/" << endl;
+				cout << "/*\t" << right << ANSI_COLOR_MAGENTA << (i + 1) << ANSI_COLOR_RESET ") - Disponible tablero de juego de " << ANSI_COLOR_GREEN << (dimTamblero[i] / TAM_TESELA) << "x" << (dimTamblero[i] / TAM_TESELA) << ANSI_COLOR_RESET " " << dimTamblero[i] << " Threads" << setw(40) << "*/" << endl;
 			}
 			cout << "/*  ---------------------------------------------------------------------------------  */" << endl;
-			cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Selecione el id de una GPU para jugar." << setw(40) << "*/" << endl;
+			cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Selecione un tablero para la fiesta de CUDA." << setw(35) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
-		cout << " - Selecione una opcion para juegar (" ANSI_COLOR_GREEN "Pulse 0 para salir de la configuracion" ANSI_COLOR_RESET "): ";
+		cout << " - Selecione una opcion para juegar (" ANSI_COLOR_GREEN "0 para salir de la configuracion" ANSI_COLOR_RESET "): ";
 		cin >> gpuOpc;		// Entrada de texto por teclado.
 		if (gpuOpc != 0 && (gpuOpc < 0 || gpuOpc > 3)) {
 			ERROR_MSS("Error opcion de juego introducida no es valida.");
@@ -55,12 +55,12 @@ int setDificultad() {
 	do {
 		system("cls");
 		cout << "/***************************************************************************************/" << endl;
-		cout << "/*  +--> " << ANSI_COLOR_CYAN "Dificulta de la partida:" ANSI_COLOR_RESET << setw(47) << "*/" << endl;
+		cout << "/*  +--> " << ANSI_COLOR_CYAN "Nivel de dificulta de partida:" ANSI_COLOR_RESET << setw(52) << "*/" << endl;
 		cout << "/*  ---------------------------------------------------------------------------------  */" << endl;
 		cout << "/*" << setw(87) << "*/" << endl;
 		string niveles[NIVEL_DIFICULTAD] = {"Muy Facil", "Facil", "Normal", "Avanzado", "Experto"};
 		for (int  i = 0; i < NIVEL_DIFICULTAD; i++) {
-			cout << "/*\t" ANSI_COLOR_MAGENTA << (i + 1) << ANSI_COLOR_RESET ") - "  << ANSI_COLOR_RESET << niveles[i] << setw(40) << "*/" << endl;
+			cout << "/*\t" ANSI_COLOR_MAGENTA << (i + 1) << ANSI_COLOR_RESET ") - "  << ANSI_COLOR_RESET << niveles[i] << setw(60 - niveles[i].length()) << "*/" << endl;
 		}
 		cout << "/*" << setw(87) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
@@ -73,265 +73,156 @@ int setDificultad() {
 	return dificultad;
 }
 
-//Generamos el tablero con números aleatorios en función de la dificultad
-void generarTablero(int *tablero, double numThread, int dificultad) {
+//Generamos el tablero con nÃºmeros aleatorios en funciÃ³n de la dificultad
+long *generarTablero(double numThread, int dificultad) {
+	long row = 0, col = 0, *tablero = new long[(int)numThread];
+	int numRowFicha = log2(numThread / TAM_TESELA);			// El numero de fichas para cada jugador en funcion de las dimensiones del tablero.
 	srand(time(NULL));
-	for (int i = 0; i < numThread; i++) {
-		tablero[i] = rand() % dificultad + 1;
+	for (int i = 0; i < numThread; i++) { 
+		row = i / ((int)numThread / TAM_TESELA);			// Calculamos la columna 
+		col = ((row % 2) == 0)? 1 : 0;						// Calculamos el desplazamiento de la fichas en la colocacion.
+		int bonba = rand() % dificultad;				    // Gennera Bombas en funcion de las dificultad selecionada.
+		tablero[i] = (((col + i) % 2) == 0)? (row < numRowFicha)? 11 + bonba : POS_TAB_JUEGO_EMPTY : (row >= (numRowFicha * (numRowFicha - 1)))? 22 + bonba : POS_TAB_JUEGO_EMPTY;
 	}
+	return tablero;
 }
 
 
-//Rellenar tablero cuando hemos explotado bloques
-void rellenarTablero(int *tablero, double numThread, int dificultad) {
-	srand(time(NULL));
-	for (int i = 0; i < (numThread / TAM_TESELA); i++) {
-		if (tablero[i] == 0) {
-			tablero[i] = rand() % 4 + dificultad + 1;
-		}
-	}
-}
 
-//Función que imprime el número de columnas que va a tener el tablero para que sea más facil elegir piezas
+//FunciÃ³n que imprime el nÃºmero de columnas que va a tener el tablero para que sea mÃ¡s facil elegir piezas
 void imprimirColumnas(double numThread) {
 	for (int i = 0; i < (numThread / TAM_TESELA); i++) {
-		cout << ((i == 0)? setw(8) : (i < 9)? setw(5)  : setw(4)) << i + 1;
+		cout << ((i == 0) ? setw(12) : (i < 9) ? setw(3) : setw(3.5)) << i + 1;
 	}
 	cout << "" << endl;
 	for (int i = 0; i < (numThread / TAM_TESELA); i++) {
-		cout << ((i == 0) ? setw(11) : setw(6)) << "|" << i + 1;
+		cout << ((i == 0)? setw(12) : setw(3)) << "|";
 	}
-	cout << "\n";
+	cout << "" << endl;
 }
 //Imprimimos el tablero
-void imprimirTablero(int *tablero, double numThread) {
+void imprimirTablero(long *tablero, double numThread) {
 	imprimirColumnas(numThread);
-	int color[NUM_FICHAS] = {7, 4, 11, 2, 5, 6, 3 };
 	for (int i = 0; i < numThread / TAM_TESELA; i++) {
-		cout << ((i < 9) ? setw(5) : setw(4)) << "-" << i + 1;
-		for (int k = 0; k < numThread/TAM_TESELA; k++) {
-			//Damos color en función del número imprimir
-			int bloque = tablero[i * ((int)numThread / TAM_TESELA) + k];
-			if (bloque < NUM_FICHAS) {
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color[bloque]);
-			} else {
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+		cout << setw(4) << i+1 << setw(3) << "-" << setw(3) << "";
+		for (int k = 0; k < numThread/TAM_TESELA; k++) {								// Damos color en funciÃ³n del nÃºmero imprimir
+			int background = ((i + k) % 2 == 0) ? COLOR_BLANCO : COLOR_NEGRO;			// Color que contrulle el tablero.
+			long bloque = tablero[i * ((int)numThread / TAM_TESELA) + k];
+			//if (bloque < NUM_FICHAS) {												// Calculamos el color de la casilla.
+				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+			//} 
+				cout << " " << (((bloque - (bloque % 10)) > POS_TAB_JUEGO_EMPTY)? "#" : "O") << " ";
+		}
+		cout << ANSI_COLOR_RESET "" << endl;
+	}
+}
+
+//compruebaPiezas(tablero, columnaHilo, filaHilo, filas, columnas, anterior);
+//AquÃ­ vamos a indicarle hacia donde tiene que buscar en funciÃ³n de la posiciÃ³n del tablero en la cual nos encontremos
+//Primero comprobamos que no sea un tipo de bomba, en nuestro caso, las bombas van a ser 7 8 y 9 
+//7 elimina la fila, 8 la columna y 9 es el TNT
+__device__ void compruebaPiezas(long *tablero, int columna, int fila, int direcion) {
+	int ficha = tablero[(fila * TAM_TESELA) + columna];
+	switch (ficha % 10) {
+		case 1:
+		case 2:
+			switch (direcion) {
+				case 10:					// Movimiento superior-izquierda.
+					//compruebaArribaIzquierda(tablero, columna, fila, ficha);
+					break;
+				case 11:					// Movimiento superior-derecha.
+					compruebaArribaDerecha(tablero, columna, fila, ficha);
+					break;					
+				case 20:					// Movimiento inferior-izquierda.
+					//compruebaAbajoIzquierda(tablero, columna, fila, ficha);
+					break;					
+				case 21:					// Movimiento inferior-derecha.
+					//compruebaAbajoDerecha(tablero, columna, fila, ficha);
+					break;
 			}
-			cout << "| " << bloque << " |";
-		}
-		cout << "\n";
+			break;
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			//compruebaAbajoDerecha(tablero, columna, fila, ficha);
+			//compruebaAbajoIzquierda(tablero, columna, fila, ficha);
+			compruebaArribaDerecha(tablero, columna, fila, ficha);
+			//compruebaArribaIzquierda(tablero, columna, fila, ficha);
+			break;
 	}
 }
 
-__device__ void compruebaPiezas(int * tablero, int columna, int fila, int filas, int columnas, int anterior)
-{
-	//compruebaPiezas(tablero, columnaHilo, filaHilo, filas, columnas, anterior);
-	//Aquí vamos a indicarle hacia donde tiene que buscar en función de la posición del tablero en la cual nos encontremos
-	//Primero comprobamos que no sea un tipo de bomba, en nuestro caso, las bombas van a ser 7 8 y 9 
-	//7 elimina la fila, 8 la columna y 9 es el TNT
-	if (tablero[(fila * columnas) + columna] != 7 && tablero[(fila * columnas) + columna] != 8 && tablero[(fila * columnas) + columna] != 9) {
-		//EMPEZAMOS CON LAS PIEZAS DE LAS CUATRO ESQUINAS
-		//SI ESTAMOS EN LA SUPERIOR IZQUIERDA SOLO PODEMOS COMPROBAR HACIA ABAJO, DERECHA Y DIAGONAL DERECHA
-		if (fila == 0 && columna == 0) {
-			compruebaDerecha(tablero, columna, fila, filas, columnas, anterior);
-			compruebaAbajo(tablero, columna, fila, filas, columnas, anterior);
-		}
-		//SI ESTAMOS EN LA SUPERIOR DERECHA SOLO PODEMOS COMPROBAR HACIA ABAJO, IZQUIERDA Y DIAGONAL IZQUIERDA
-		if (fila == 0 && columna == (columnas - 1)) {
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, anterior);
-			compruebaAbajo(tablero, columna, fila, filas, columnas, anterior);
-		}
-		//SI ESTAMOS EN LA INFERIOR IZQUIERDA SOLO PODEMOS COMPROBAR HACIA ARRIBA, DERECHA Y DIAGONAL DERECHA
-		if (fila == (filas - 1) && columna == 0) {
-			compruebaDerecha(tablero, columna, fila, filas, columnas, anterior);
-			compruebaArriba(tablero, columna, fila, filas, columnas, anterior);
-		}
-		//SI ESTAMOS EN LA INFERIOR DERECHA SOLO PODEMOS COMPROBAR HACIA ARRIBA, IZQUIERDA Y DIAGONAL IZQUIERDA
-		if (fila == (filas - 1) && columna == (columnas - 1)) {
-			compruebaArriba(tablero, columna, fila, filas, columnas, anterior);
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, anterior);
-		}
-		//UNA VEZ COMPROBADAS LAS ESQUINAS, AUN TENEMOS OTROS CUATRO CASOS ESPECIALES, ESTAR EN LA FILA DE ARRIBA, FILA DE ABAJO, COLUMNA DE LA IZQ Y COLUMNA DE LA DERECHA
-		//SI ESTAMOS EN LA FILA DE ARRIBA SOLO PODEMOS IR HACIA IZQ, DERECHA, DIAGONAL DERECHA, DIAGONAL IZQUIERDA Y HACIA ABAJO
-		if (fila == 0) {
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, anterior);
-			compruebaDerecha(tablero, columna, fila, filas, columnas, anterior);
-			compruebaAbajo(tablero, columna, fila, filas, columnas, anterior);
-		}
-		//SI ESTAMOS EN LA FILA DE ABAJO SOLO PODEMOS IR HACIA IZQ, DERECHA, DIAGONAL DERECHA, DIAGONAL IZQUIERDA Y ARRIBA
-		if (fila == (filas - 1)) {
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, anterior);
-			compruebaDerecha(tablero, columna, fila, filas, columnas, anterior);
-			compruebaArriba(tablero, columna, fila, filas, columnas, anterior);
-		}
-		//SI ESTAMOS EN LA COLUMNA IZQUIERDA SOLO SE COMPRUEBA HACIA DERECHA, ARRIBA, ABAJO, DIAGONAL DERECHA Y DIAGONAL IZQ
-		if (columna == 0) {
-			compruebaDerecha(tablero, columna, fila, filas, columnas, anterior);
-			compruebaArriba(tablero, columna, fila, filas, columnas, anterior);
-			compruebaAbajo(tablero, columna, fila, filas, columnas, anterior);
-
-		}
-		//SI ESTAMOS EN LA COLUMNA DERECHA SOLO SE COMPRUEBA HACIA IZQUIERDA, ARRIBA, ABAJO, DIAGONAL DERECHA Y DIAGONAL IZQ
-		if (columna == (columnas - 1)) {
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, anterior);
-			compruebaArriba(tablero, columna, fila, filas, columnas, anterior);
-			compruebaAbajo(tablero, columna, fila, filas, columnas, anterior);
-
-		}
-		//CUALQUIER OTRO CASO
-		else {
-			compruebaArriba(tablero, columna, fila, filas, columnas, anterior);
-			compruebaAbajo(tablero, columna, fila, filas, columnas, anterior);
-			compruebaDerecha(tablero, columna, fila, filas, columnas, anterior);
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, anterior);
-		}
-	}
-	else { //BOMBAS
-		   //7 elimina la fila, 8 la columna y 9 es el TNT
-		if (tablero[(fila * columnas) + columna] == 7) {
-			compruebaDerecha(tablero, columna, fila, filas, columnas, 7);
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, 7);
-		}
-		else if (tablero[(fila * columnas) + columna] == 8) {
-			compruebaAbajo(tablero, columna, fila, filas, columnas, 8);
-			compruebaArriba(tablero, columna, fila, filas, columnas, 8);
-		}
-		else if (tablero[(fila * columnas) + columna] == 9) {
-			compruebaAbajo(tablero, columna, fila, filas, columnas, 9);
-			compruebaArriba(tablero, columna, fila, filas, columnas, 9);
-			compruebaDerecha(tablero, columna, fila, filas, columnas, 9);
-			compruebaIzquierda(tablero, columna, fila, filas, columnas, 9);
-			compruebaAbajoDerecha(tablero, columna, fila, filas, columnas, 9);
-			compruebaAbajoIzquierda(tablero, columna, fila, filas, columnas, 9);
-			compruebaArribaDerecha(tablero, columna, fila, filas, columnas, 9);
-			compruebaArribaIzquierda(tablero, columna, fila, filas, columnas, 9);
-		}
-	}
-}
-
-
-__device__ void compruebaArriba(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
-	if (anterior == 8) {
-		for (int i = 0; (fila - i) >= 0; i++) {
-			tablero[((fila - i) * columnas) + columna] = 0;
-		}
-	}
-	else if (anterior == 9) {
-		tablero[(fila * columnas) + columna] = 0;
-		if (fila != 0) {
-			tablero[((fila - 1) * columnas) + columna] = 0;
-		}
-	}
-	else {
-		if (tablero[((fila - 1) * columnas) + columna] == anterior) {
-			tablero[((fila - 1) * columnas) + columna] = 0;
-			tablero[(fila * columnas) + columna] = 0;
-			compruebaPiezas(tablero, columna, fila - 1, filas, columnas, anterior);
-		}
-	}
-}
-
-__device__ void compruebaAbajo(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
-	if (anterior == 8) {
-		for (int i = 0; (fila + i) < filas; i++) {
-			tablero[((fila + i) * columnas) + columna] = 0;
-		}
-	}
-	else if (anterior == 9) {
-		tablero[(fila * columnas) + columna] = 0;
-		if (fila != (filas - 1)) {
-			tablero[((fila + 1) * columnas) + columna] = 0;
-		}
-	}
-	else {
-		if (tablero[((fila + 1) * columnas) + columna] == anterior) {
-			tablero[((fila + 1) * columnas) + columna] = 0;
-			tablero[(fila * columnas) + columna] = 0;
-			compruebaPiezas(tablero, columna, fila + 1, filas, columnas, anterior);
-		}
-	}
-}
-
-__device__ void compruebaDerecha(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
-	if (anterior == 7) {
-		for (int i = 0; (fila + i) < columnas; i++) {
-			tablero[(fila  * columnas) + i] = 0;
-		}
-	}
-	else if (anterior == 9) {
-		tablero[(fila * columnas) + columna] = 0;
-		if (columna != (columnas - 1)) {
-			tablero[(fila * columnas) + columna + 1] = 0;
-		}
-	}
-	else {
-		if (tablero[(fila * columnas) + (columna + 1)] == anterior) {
-			tablero[(fila * columnas) + (columna + 1)] = 0;
-			tablero[(fila * columnas) + columna] = 0;
-			compruebaPiezas(tablero, columna + 1, fila, filas, columnas, anterior);
-		}
-	}
-}
-
-__device__ void compruebaIzquierda(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
-	if (anterior == 7) {
-		for (int i = 0; (fila - i) >= 0; i++) {
-			tablero[(fila  * columnas) - i] = 0;
-		}
-	}
-	else if (anterior == 9) {
-		tablero[(fila * columnas) + columna] = 0;
-		if (columna != 0) {
-			tablero[(fila * columnas) + columna - 1] = 0;
-		}
-	}
-	else {
-		if (tablero[(fila * columnas) + (columna - 1)] == anterior) {
-			tablero[(fila * columnas) + (columna - 1)] = 0;
-			tablero[(fila * columnas) + columna] = 0;
-			compruebaPiezas(tablero, columna - 1, fila, filas, columnas, anterior);
-		}
-	}
-}
-
-__device__ void compruebaArribaDerecha(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
+/*
+	Comprueba diagonal superior derecha.
+*/
+__device__ void compruebaArribaDerecha(long *tablero, int columna, int fila, int ficha) {
 	//en columna = columnas -1 y en fila = 0
-	if (columna != columnas - 1 && fila != 0) {
-		tablero[((fila - 1) * columnas) + columna + 1] = 0;
+	if (columna != TAM_TESELA - 1 /*&& fila != 0*/) {
+		tablero[fila - 1][&columna + 1] == ficha;
+		//tablero[((fila - 1) * TAM_TESELA) + columna + 1] = ficha;
 	}
 }
-__device__ void compruebaAbajoDerecha(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
+
+/*
+	Comprueba diagonal inferior derecha.
+*/
+__device__ void compruebaAbajoDerecha(long *tablero, int columna, int fila, int ficha) {
 	//en columna = columnas - 1 y en fila = filas - 1
-	if (columna != columnas - 1 && fila != filas - 1) {
-		tablero[((fila + 1) * columnas) + columna + 1] = 0;
+	if (columna != TAM_TESELA - 1 && fila != TAM_TESELA - 1) {
+		tablero[((fila + 1) * TAM_TESELA) + columna + 1] = ficha;
 	}
 }
 
-__device__ void compruebaArribaIzquierda(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
+/*
+	Comprueba diagonal inferior izquierda.
+*/
+__device__ void compruebaArribaIzquierda(long *tablero, int columna, int fila, int ficha) {
 	//en columna = 0 y en fila = 0
-	if (columna != 0 && fila != 0) {
-		tablero[((fila - 1) * columnas) + columna - 1] = 0;
-	}
+	//if (columna != 0 /*&& fila != 0*/) {
+		tablero[((fila - 1) * TAM_TESELA) + columna - 1] = ficha;
+	//}
 }
-__device__ void compruebaAbajoIzquierda(int *tablero, int columna, int fila, int filas, int columnas, int anterior) {
+
+/*
+	Comprueba diagonal supeiror izquierda.
+*/
+__device__ void compruebaAbajoIzquierda(long *tablero, int columna, int fila, int ficha) {
 	//en columna = 0 y en fila = filas -1
-	if (columna != 0 && fila != filas - 1) {
-		tablero[((fila + 1) * columnas) + columna - 1] = 0;
+	if (columna != 0 && fila != TAM_TESELA - 1) {
+		tablero[((fila + 1) * TAM_TESELA) + columna - 1] = ficha;
 	}
 }
 
 
-__global__ void ToyBlastManual(int *tablero, int filas, int columnas, int columna, int fila, int bomba) {
-	//Recogemos la fila y la columna del hilo
-	int columnaHilo = threadIdx.x;
-	int filaHilo = threadIdx.y;
-
-	//Si la fila y columna del hilo coincide con la que hemos pasado por teclado, llamamos a la funcion comprueba piezas para que vaya eliminando las que son iguales
-	if (columnaHilo == columna && filaHilo == fila) {
-		int anterior = tablero[(filaHilo * columnas) + columnaHilo];
-		compruebaPiezas(tablero, columnaHilo, filaHilo, filas, columnas, anterior);
+__global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int direcion) {
+	__shared__ long Tabs[TAM_TESELA][TAM_TESELA];	// Memoria compratida para las seselas segmentado la matriz y usando la memoria compratida.
+	int XxY = numThread / TAM_TESELA;				// TamaÃ±o para las filas y las columnas.
+	int tx = threadIdx.x, ty = threadIdx.y;			// Identicadores de filas y columnas de acuerdo con los hilos.
+	int bx = blockIdx.x,  by = blockIdx.y;			// Identificadores de bloques  en el eje x e y.
+	int Row = by * TAM_TESELA + ty;					// Calculamos la fila de la matriz teselada.
+	int Col = bx * TAM_TESELA + tx;					// Calculamos la columna de la matriz teselada.
+	
+	/* 
+		Si la fila y columna del hilo coincide con la pasada x a
+	*/
+	Tabs[ty][tx] = Tab[(Row * numThread) + Col];
+	__syncthreads();
+	if ((ty == col) && (tx == row) ) {
+		printf("%d - %d | %d - %d \n", Col, Row, col, row);
+		compruebaPiezas(*Tabs, Col, Row, direcion);
+		Tabs[tx][ty] = POS_TAB_JUEGO_EMPTY;		// Marcmos como vacia la casilla horiginal en la que se encontraba la ficha.
+	}
+	__syncthreads();
+	Tab[(Row * numThread)+ Col] = Tabs[ty][tx];
+			
+	/*if (Col == col && Row == row) {
+		int anterior = tablero[(ty * columnas) + tx];
+		compruebaPiezas(tablero, tx, ty, , columnas, anterior);
 		int contador = 0;
-		//Contamos ceros y generamos la bomba en función del número de bloques que explotamos
+		//Contamos ceros y generamos la bomba en funciÃ³n del nÃºmero de bloques que explotamos
 		for (int i = 0; i < filas * columnas; i++) {
 			if (tablero[i] == 0) {
 				contador++;
@@ -339,55 +230,99 @@ __global__ void ToyBlastManual(int *tablero, int filas, int columnas, int column
 		}
 
 		if (contador >= 6 && anterior != 9 && anterior != 7 && anterior != 8) {
-			tablero[(fila * columnas) + columna] = 9;
+			tablero[(row * columnas) + col] = 9;
 		}
 		if (contador == 5) {
-			tablero[(fila * columnas) + columna] = bomba; //Tengo que pasarle la bomba ya generada porque con curand me descuadraba todas las comprobaciones
+			tablero[(row * columnas) + col] = bomba; //Tengo que pasarle la bomba ya generada porque con curand me descuadraba todas las comprobaciones
 		}
 	}
 	__syncthreads();
 	//Sube los ceros que hemos colocado al comprobar la posicion pedida por teclado bajando hacia abajo los bloques
 	for (int i = 0; i <= filas; i++) {
-		if (columnaHilo > 0) {
-			if (tablero[columnaHilo*columnas + filaHilo] == 0 && !tablero[(columnaHilo - 1)*columnas + filaHilo] == 0) {
-				tablero[columnaHilo*columnas + filaHilo] = tablero[(columnaHilo - 1)*columnas + filaHilo];
-				tablero[(columnaHilo - 1)*columnas + filaHilo] = 0;
+		if (tx > 0) {
+			if (tablero[tx*columnas + ty] == 0 && !tablero[(tx - 1)*columnas + ty] == 0) {
+				tablero[tx*columnas + ty] = tablero[(tx - 1)*columnas + ty];
+				tablero[(tx - 1)*columnas + ty] = 0;
 			}
 		}
-		__syncthreads();
 	}
+	__syncthreads();*/
 }
 
 
 // 
-void playDamas(double numThread, int *tablero, info_gpu *myConfGpu, int dificultad) {
-	int fila = 1, columna = 1;
-	generarTablero(tablero, numThread, dificultad);
-	while (fila != 0 || columna != 0) {
-		imprimirTablero(tablero, numThread);
-		cout << "Introduce la fila en la que esta la ficha que deseas eliminar (0 para salir): \n";
-		cin >> fila;
-		while (fila < 0 && fila > numThread / TAM_TESELA) {
-			cout << "Numero de fila no valido, introduzca uno en rango 1 - " << numThread / TAM_TESELA << ":\n";
-			cin >> fila;
-		}
-		cout << "Introduce la columna en la que esta la ficha que deseas eliminar (0 para salir): \n";
-		cin >> columna;
-		while (columna < 0 && columna > numThread / TAM_TESELA) {
-			cout << "Numero de columna no valido, introduzca uno en rango 1 - " << numThread / TAM_TESELA << ":\n";
-			cin >> columna;
-		}
-		int *tablero_gpu;
-		//Reservamos memoria y copiamos el tablero en la GPU
-		cudaMalloc((void**)&tablero_gpu, numThread * sizeof(double));
-		cudaMemcpy(tablero_gpu, tablero, numThread * sizeof(double), cudaMemcpyHostToDevice);
-		dim3 DimGrid(((myConfGpu -> numThreadMasPerBlock) / numThread), ((myConfGpu->numThreadMasPerBlock) / numThread));		
-		dim3 DimBlock(numThread / TAM_TESELA, numThread / TAM_TESELA);
-		ToyBlastManual <<<DimGrid, DimBlock, myConfGpu ->sharedMemPerBlock >>> (tablero_gpu, numThread / TAM_TESELA, numThread / TAM_TESELA, columna - 1, fila - 1, dificultad); //Aqui empieza la fiesta con CUDA. 
-		cudaMemcpy(tablero, tablero_gpu, sizeof(double) * numThread, cudaMemcpyDeviceToHost);
+void playDamas(double numThread, info_gpu *myConfGpu, int dificultad) {
+	long *tablero = generarTablero(numThread, dificultad);
+	long cont = 0;
+	string input = { NULL };
+	do {
 		system("cls");
-		rellenarTablero(tablero, numThread, dificultad);
-		cudaFree(tablero_gpu);
+		cout << "/***************************************************************************************/" << endl;
+		cout << "/*  +--> " << ANSI_COLOR_CYAN "Tablero de juego, Turno de juego de ficha: " ANSI_COLOR_RESET << (new string[2]{"#","O"})[(cont % 2 == 0)? 0 : 1] << setw(36) << "*/" << endl;
+		cout << "/*  ---------------------------------------------------------------------------------  */" << endl;
+		cout << "  " << setw(87) << "  " << endl;
+		imprimirTablero(tablero, numThread);
+		cout << "  " << setw(87) << "  " << endl;
+		cout << "/*  -----------------------------------------------------------------------------------  */" << endl;
+		cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Jugada con el formato X:Y:D (X = column, Y = row, " << setw(28) << " */" << endl;
+		cout << "/*    " << setw(72) << " D = (10 = sup-izq, 20 = inf-izq, 11 = sup-dech, 21 = inf-dech)). "			   << setw(13) << " */" << endl;
+		cout << "/*****************************************************************************************/" << endl;
+		teclado:
+		cout << " - Realice su jugada (" ANSI_COLOR_GREEN "0 para salir de la partida s para guardar la partida." ANSI_COLOR_RESET "): ";
+		cin >> input;															// Entrada de texto por teclado.
+		smatch match;
+		regex  reg_expre{R"(\d{1,2}:\d{1,2}:(1|2){1}(0|1){1})"};				// Epresion regular para las filas y columnas.
+		bool found = regex_match(input, match, reg_expre);						// Coparacion que busca un expresion de tipo fila:columna
+		if (found) {
+			int *jugada = getRowAndColumn(input, numThread);
+			if (sizeof(jugada) < NUM_DIMENSION_TAB) {
+				ERROR_MSS("Error en la columna o fila introducida.");
+				goto teclado;
+			} else {
+				long *tablero_cuda;
+				setCudaMalloc(tablero_cuda, numThread);							// Reservamos espacio de memoria para el tablero en la GPU.
+				setCudaMemcpyToDevice(tablero_cuda, tablero, numThread);		// Tranferimos el tablero a la GPU.
+				dim3 DimGrid(numThread / TAM_TESELA, numThread / TAM_TESELA);
+				dim3 DimBlock(TAM_TESELA, TAM_TESELA);
+				//size_t sharedMemByte = myConfGpu->sharedMemPerBlock;
+				DamasBomPlay << <DimGrid, DimBlock>> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]); //Aqui empieza la fiesta con CUDA. 
+				setCudaMemcpyToHost(tablero, tablero_cuda,  numThread);			// Trasferimos el tablero del GPU al HOST.
+				cudaFree(tablero_cuda);
+				cont++;
+				char car = getchar();
+				system("pause");
+			}
+		} else {
+			switch ((char)&input) {
+				case 's':									// Para la persistencia desde la partida.
+					
+					break;
+				default:									// Carraterees no validos
+					if (input != "0") {
+						ERROR_MSS("Error carrater o movimiento introducido no valido no valida.");
+						goto teclado;
+					}
+					break;
+			}
+		}
+		
+	} while (input != "0");
+}
+
+int *getRowAndColumn(string jug, double numThread) {
+	string delimiter = ":", aux = jug + ":";
+	int pos = 0, cont = 0, *rowCol = new int[NUM_DIMENSION_TAB];
+	bool isNotErrorColRow = true;
+	while ((pos = aux.find(delimiter)) != string::npos && isNotErrorColRow) {
+		int token = stoi(aux.substr(0, pos));
+		if (isNotErrorColRow = (token > 0 && token <= (numThread / TAM_TESELA))) {
+			rowCol[cont] = token;
+		}
+		cout << token << endl;
+		aux.erase(0, pos + delimiter.length());
+		cont++;
 	}
+
+	return rowCol;
 }
 
