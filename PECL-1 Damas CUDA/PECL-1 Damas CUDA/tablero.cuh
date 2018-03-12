@@ -1,11 +1,14 @@
 #pragma once
 #include "UtilGPU.cuh"
-#include "KernelMemShared.cuh"
 #include "GPUCarasteristic.h"
 #include <conio.h>
 #include <Windows.h>
 #include <regex>
 #include <math.h>
+
+#ifdef __INTELLISENSE__
+#define __syncthreads();
+#endif
 
 // Declaracion de constantes.
 #define TAM_TESELA 16			// tesela mas optima.
@@ -14,6 +17,8 @@
 #define NIVEL_DIFICULTAD 5		// Numeros de niveles de dificultad
 #define POS_TAB_JUEGO_EMPTY 10	// Posicion del tablero vacia si niguna ficha.
 #define NUM_FICHAS	9
+
+// Declaracion de variables globales.
 
 
 // Declaracion de strut para alamacenar info gpu para su configuracion
@@ -29,11 +34,12 @@ typedef struct InfoGPU {
 // Declaracion de funciones y metodos CPU.
 void getCofigPlay(int devian, cudaDeviceProp *deviceProp, info_gpu *myConfGpu);
 double setGpuForPlayAuto(cudaDeviceProp *devProp, info_gpu *myConfGpu, int deviceCurrent);
-double setGpuForPlayManual(cudaDeviceProp *devProp, info_gpu *myConfGpu, int deviceCurrent);
 int setDificultad();
 long* generarTablero(double numThread, int dificultad);
 void imprimirTablero(long *tablero, double numThread);
 void imprimirColumnas(double numThread);
-void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificultad);
+void playDamas(double numThread, info_gpu *myConfGpu, int dificultad);
 int *getRowAndColumn(string jug, double numThread);
-bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada);
+
+// Funcion y metonos GPU
+__global__ void DamasBomPlay(long *tablero, int numthread, int row, int col, int direcion);
