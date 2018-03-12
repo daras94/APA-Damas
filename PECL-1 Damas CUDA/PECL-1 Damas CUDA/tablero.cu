@@ -131,6 +131,7 @@ __global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int dir
 	int tx = blockIdx.x * TAM_TESELA + row;														// Calculamos el indice x de la jugada en la matriz teselda.
 	int ty = blockIdx.y * TAM_TESELA + col;														// Calculamos el indice y de la jugada en la matriz teselda.
 	// Cuando encontramos el hilo que coincide con la jugada ejecutamos la jugada.
+	printf("X = %d, Y = %d", gridDim.x, gridDim.y);
 	if ((tx == Row) && (ty == Col)) {
 		int movV = threadIdx.x + (new int[2]{-1, 1})[(direcion % 10)];						    // Determinamos el movimiento vertical en funcion de la direcion recibida
 		int movH = threadIdx.y + (new int[2]{-1, 1})[((direcion - (direcion % 10)) / 10) - 1];  // Determinamos el movimiento Horizontal en funcion de la direcion recibida
@@ -178,9 +179,9 @@ void playDamas(double numThread, info_gpu *myConfGpu, int dificultad) {
 				long *tablero_cuda;
 				setCudaMalloc(tablero_cuda, numThread);							// Reservamos espacio de memoria para el tablero en la GPU.
 				setCudaMemcpyToDevice(tablero_cuda, tablero, numThread);		// Tranferimos el tablero a la GPU.
-				dim3 DimGrid(numThread / TAM_TESELA, numThread / TAM_TESELA, 1);
-				dim3 DimBlock(TAM_TESELA, TAM_TESELA, 1);
-				DamasBomPlay << <DimGrid, DimBlock>> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]); //Aqui empieza la fiesta con CUDA. 
+				dim3 dimGrid_c(numThread / TAM_TESELA, numThread / TAM_TESELA, 1);
+				dim3 dimBlock_c(TAM_TESELA, TAM_TESELA / 4, 1);
+				DamasBomPlay << <dimGrid_c, dimBlock_c>> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]); //Aqui empieza la fiesta con CUDA. 
 				setCudaMemcpyToHost(tablero, tablero_cuda,  numThread);			// Trasferimos el tablero del GPU al HOST.
 				cudaFree(tablero_cuda);
 				/*if (error_play) {
