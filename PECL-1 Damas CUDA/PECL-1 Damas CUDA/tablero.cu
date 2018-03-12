@@ -120,7 +120,7 @@ void imprimirTablero(long *tablero, double numThread) {
 
 
 __global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int direcion) {
-	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];											// Memoria compratida para las seselas segmentado la matriz y usando la memoria compratida.
+	__shared__ long Tabs[TAM_TESELA][TAM_TESELA];											// Memoria compratida para las seselas segmentado la matriz y usando la memoria compratida.
 	int Row   = blockIdx.y * TAM_TESELA + threadIdx.y;											// Calculamos la fila de la matriz teselada.
 	int Col   = blockIdx.x * TAM_TESELA + threadIdx.x;											// Calculamos la columna de la matriz teselada.
 	int width = numThread / TAM_TESELA;															// Calculamos el tamaño en funcion del ancho.
@@ -131,10 +131,11 @@ __global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int dir
 	int tx = blockIdx.x * TAM_TESELA + row;														// Calculamos el indice x de la jugada en la matriz teselda.
 	int ty = blockIdx.y * TAM_TESELA + col;														// Calculamos el indice y de la jugada en la matriz teselda.
 	// Cuando encontramos el hilo que coincide con la jugada ejecutamos la jugada.
-	printf("X = %d, Y = %d", gridDim.x, gridDim.y);
+	//printf("X = %d, Y = %d", gridDim.x, gridDim.y);
 	if ((tx == Row) && (ty == Col)) {
 		int movV = threadIdx.x + (new int[2]{-1, 1})[(direcion % 10)];						    // Determinamos el movimiento vertical en funcion de la direcion recibida
 		int movH = threadIdx.y + (new int[2]{-1, 1})[((direcion - (direcion % 10)) / 10) - 1];  // Determinamos el movimiento Horizontal en funcion de la direcion recibida
+		printf("V = %d, H = %d \n", movV, movH);
 		isJugadaValida = (movV != -1 && movH != -1);
 		if (isJugadaValida) {
 			Tabs[movH][movV] = Tab[tx * width + ty];											// Insertamos la ficha en la nueva posicion.
@@ -179,9 +180,10 @@ void playDamas(double numThread, info_gpu *myConfGpu, int dificultad) {
 				long *tablero_cuda;
 				setCudaMalloc(tablero_cuda, numThread);							// Reservamos espacio de memoria para el tablero en la GPU.
 				setCudaMemcpyToDevice(tablero_cuda, tablero, numThread);		// Tranferimos el tablero a la GPU.
-				dim3 dimGrid_c(numThread / TAM_TESELA, numThread / TAM_TESELA, 1);
-				dim3 dimBlock_c(TAM_TESELA, TAM_TESELA / 4, 1);
-				DamasBomPlay << <dimGrid_c, dimBlock_c>> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]); //Aqui empieza la fiesta con CUDA. 
+				dim3 dimGrid_c(numThread / TAM_TESELA, numThread / TAM_TESELA);
+				dim3 dimBlock_c(TAM_TESELA, TAM_TESELA);
+				size_t mem_shared_dinamic = TAM_TESELA * TAM_TESELA * sizeof(long);
+				DamasBomPlay << <dimGrid_c, dimBlock_c, mem_shared_dinamic>> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]); //Aqui empieza la fiesta con CUDA. 
 				setCudaMemcpyToHost(tablero, tablero_cuda,  numThread);			// Trasferimos el tablero del GPU al HOST.
 				cudaFree(tablero_cuda);
 				/*if (error_play) {
@@ -189,6 +191,7 @@ void playDamas(double numThread, info_gpu *myConfGpu, int dificultad) {
 					goto teclado;
 				}*/
 				cont++;
+				system("pause");
 			}
 		} else {
 			switch ((char)&input) {
@@ -203,7 +206,6 @@ void playDamas(double numThread, info_gpu *myConfGpu, int dificultad) {
 					break;
 			}
 		}
-		
 	} while (input != "0");
 }
 

@@ -6,7 +6,9 @@
 #include <regex>
 #include <math.h>
 
-
+#ifdef __INTELLISENSE__
+#define __syncthreads();
+#endif
 
 // Declaracion de constantes.
 #define TAM_TESELA 16			// tesela mas optima.

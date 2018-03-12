@@ -15,13 +15,13 @@ using namespace std;
 
 
 // Definiciones de colores.
-#define ANSI_COLOR_RED     "\x1B[1;31m" 
-#define ANSI_COLOR_GREEN   "\x1B[1;32m"
-#define ANSI_COLOR_YELLOW  "\x1B[1;33m"
-#define ANSI_COLOR_BLUE    "\x1B[1;34m"
-#define ANSI_COLOR_MAGENTA "\x1B[1;35m"
-#define ANSI_COLOR_CYAN    "\x1B[1;36m"
-#define ANSI_COLOR_RESET   "\x1B[1;0m"	//Restablece el color del pront.
+#define ANSI_COLOR_RED     "\033[1;31m" 
+#define ANSI_COLOR_GREEN   "\033[1;32m"
+#define ANSI_COLOR_YELLOW  "\033[1;33m"
+#define ANSI_COLOR_BLUE    "\033[1;34m"
+#define ANSI_COLOR_MAGENTA "\033[1;35m"
+#define ANSI_COLOR_CYAN    "\033[1;36m"
+#define ANSI_COLOR_RESET   "\033[1;0m"	//Restablece el color del pront.
 
 // Definiciones de colores.
 #define COLOR_NEGRO 0
