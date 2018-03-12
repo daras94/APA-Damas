@@ -41,8 +41,3 @@ int *getRowAndColumn(string jug, double numThread);
 
 // Funcion y metonos GPU
 __global__ void DamasBomPlay(long *tablero, int numthread, int row, int col, int direcion);
-__device__ void compruebaPiezas(long tablero, int columna, int fila, int direcion);
-__device__ void compruebaArribaDerecha(long *tablero, int columna, int fila, int ficha);
-__device__ void compruebaAbajoDerecha(long *tablero, int columna, int fila, int ficha);
-__device__ void compruebaArribaIzquierda(long *tablero, int columna, int fila, int ficha);
-__device__ void compruebaAbajoIzquierda(long *tablero, int columna, int fila, int ficha);

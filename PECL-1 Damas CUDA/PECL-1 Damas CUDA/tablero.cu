@@ -106,7 +106,7 @@ void imprimirTablero(long *tablero, double numThread) {
 	for (int i = 0; i < numThread / TAM_TESELA; i++) {
 		cout << setw(4) << i+1 << setw(3) << "-" << setw(3) << "";
 		for (int k = 0; k < numThread/TAM_TESELA; k++) {								// Damos color en función del número imprimir
-			int background = ((i + k) % 2 == 0) ? COLOR_BLANCO : COLOR_NEGRO;			// Color que contrulle el tablero.
+			int background = ((i + k) % 2 == 0) ? COLOR_GRIS : COLOR_NEGRO;			// Color que contrulle el tablero.
 			long bloque = tablero[i * ((int)numThread / TAM_TESELA) + k];
 			//if (bloque < NUM_FICHAS) {												// Calculamos el color de la casilla.
 				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
@@ -118,104 +118,29 @@ void imprimirTablero(long *tablero, double numThread) {
 	}
 }
 
-//compruebaPiezas(tablero, columnaHilo, filaHilo, filas, columnas, anterior);
-//Aquí vamos a indicarle hacia donde tiene que buscar en función de la posición del tablero en la cual nos encontremos
-//Primero comprobamos que no sea un tipo de bomba, en nuestro caso, las bombas van a ser 7 8 y 9 
-//7 elimina la fila, 8 la columna y 9 es el TNT
-__device__ void compruebaPiezas(long *tablero, int columna, int fila, int direcion) {
-	int ficha = tablero[(fila * TAM_TESELA) + columna];
-	switch (ficha % 10) {
-		case 1:
-		case 2:
-			switch (direcion) {
-				case 10:					// Movimiento superior-izquierda.
-					//compruebaArribaIzquierda(tablero, columna, fila, ficha);
-					break;
-				case 11:					// Movimiento superior-derecha.
-					compruebaArribaDerecha(tablero, columna, fila, ficha);
-					break;					
-				case 20:					// Movimiento inferior-izquierda.
-					//compruebaAbajoIzquierda(tablero, columna, fila, ficha);
-					break;					
-				case 21:					// Movimiento inferior-derecha.
-					//compruebaAbajoDerecha(tablero, columna, fila, ficha);
-					break;
-			}
-			break;
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-			//compruebaAbajoDerecha(tablero, columna, fila, ficha);
-			//compruebaAbajoIzquierda(tablero, columna, fila, ficha);
-			compruebaArribaDerecha(tablero, columna, fila, ficha);
-			//compruebaArribaIzquierda(tablero, columna, fila, ficha);
-			break;
-	}
-}
-
-/*
-	Comprueba diagonal superior derecha.
-*/
-__device__ void compruebaArribaDerecha(long *tablero, int columna, int fila, int ficha) {
-	//en columna = columnas -1 y en fila = 0
-	if (columna != TAM_TESELA - 1 /*&& fila != 0*/) {
-		tablero[fila - 1][&columna + 1] == ficha;
-		//tablero[((fila - 1) * TAM_TESELA) + columna + 1] = ficha;
-	}
-}
-
-/*
-	Comprueba diagonal inferior derecha.
-*/
-__device__ void compruebaAbajoDerecha(long *tablero, int columna, int fila, int ficha) {
-	//en columna = columnas - 1 y en fila = filas - 1
-	if (columna != TAM_TESELA - 1 && fila != TAM_TESELA - 1) {
-		tablero[((fila + 1) * TAM_TESELA) + columna + 1] = ficha;
-	}
-}
-
-/*
-	Comprueba diagonal inferior izquierda.
-*/
-__device__ void compruebaArribaIzquierda(long *tablero, int columna, int fila, int ficha) {
-	//en columna = 0 y en fila = 0
-	//if (columna != 0 /*&& fila != 0*/) {
-		tablero[((fila - 1) * TAM_TESELA) + columna - 1] = ficha;
-	//}
-}
-
-/*
-	Comprueba diagonal supeiror izquierda.
-*/
-__device__ void compruebaAbajoIzquierda(long *tablero, int columna, int fila, int ficha) {
-	//en columna = 0 y en fila = filas -1
-	if (columna != 0 && fila != TAM_TESELA - 1) {
-		tablero[((fila + 1) * TAM_TESELA) + columna - 1] = ficha;
-	}
-}
-
 
 __global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int direcion) {
-	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];	// Memoria compratida para las seselas segmentado la matriz y usando la memoria compratida.
-	int Row   = blockIdx.y * TAM_TESELA + threadIdx.y;	// Calculamos la fila de la matriz teselada.
-	int Col   = blockIdx.x * TAM_TESELA + threadIdx.x;	// Calculamos la columna de la matriz teselada.
-	int width = numThread / TAM_TESELA;					// Calculamos el tamaño en funcion del ancho.
-	bool isMov = false;									// Bandera para movimientos. 
-	//	Caragamos la matriz en la matriz teselada con coalalesesian y sin comflitos en bancos de memoria.
+	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];											// Memoria compratida para las seselas segmentado la matriz y usando la memoria compratida.
+	int Row   = blockIdx.y * TAM_TESELA + threadIdx.y;											// Calculamos la fila de la matriz teselada.
+	int Col   = blockIdx.x * TAM_TESELA + threadIdx.x;											// Calculamos la columna de la matriz teselada.
+	int width = numThread / TAM_TESELA;															// Calculamos el tamaño en funcion del ancho.
+	bool isJugadaValida = false;																// Jugada para derminar si una jugada es valida o no y retornar error.
+	// Caragamos la matriz en la matriz teselada con coalalesesian y sin comflitos en bancos de memoria.
 	Tabs[threadIdx.y][threadIdx.x] = Tab[(Row) * width + Col];
 	__syncthreads();
+	int tx = blockIdx.x * TAM_TESELA + row;														// Calculamos el indice x de la jugada en la matriz teselda.
+	int ty = blockIdx.y * TAM_TESELA + col;														// Calculamos el indice y de la jugada en la matriz teselda.
 	// Cuando encontramos el hilo que coincide con la jugada ejecutamos la jugada.
-	if ((blockIdx.x * TAM_TESELA + row) == Row && (blockIdx.y * TAM_TESELA + col)  == Col /*&& !isMov*/) {
-	//if (row == threadIdx.x && col == threadIdx.y && !isMov) {
-		int movV = (new int[2]{-1, 1})[(direcion % 10)];						  // Determinamos el movimiento vertical en funcion de la direcion recibida
-		int movH = (new int[2]{-1, 1})[((direcion - (direcion % 10)) / 10) - 1];  // Determinamos el movimiento Horizontal en funcion de la direcion recibida
-		__syncthreads();
-		Tabs[threadIdx.y + movH][threadIdx.x + movV] = Tabs[threadIdx.y][threadIdx.x];
-		Tabs[threadIdx.y][threadIdx.x] = POS_TAB_JUEGO_EMPTY;
-		//isMov = true;
+	if ((tx == Row) && (ty == Col)) {
+		int movV = threadIdx.x + (new int[2]{-1, 1})[(direcion % 10)];						    // Determinamos el movimiento vertical en funcion de la direcion recibida
+		int movH = threadIdx.y + (new int[2]{-1, 1})[((direcion - (direcion % 10)) / 10) - 1];  // Determinamos el movimiento Horizontal en funcion de la direcion recibida
+		isJugadaValida = (movV != -1 && movH != -1);
+		if (isJugadaValida) {
+			Tabs[movH][movV] = Tab[tx * width + ty];											// Insertamos la ficha en la nueva posicion.
+			Tabs[threadIdx.y][threadIdx.x] = POS_TAB_JUEGO_EMPTY;								// Ponemos en blanco la poscion previa de mi ficha.
+		}
 	}
+	__syncthreads();
 	// Cargamos el contenido de las matrizes teselada en nuestra matriz resultante.
 	Tab[(Row)* width + Col] = Tabs[threadIdx.y][threadIdx.x];
 }
@@ -258,9 +183,11 @@ void playDamas(double numThread, info_gpu *myConfGpu, int dificultad) {
 				DamasBomPlay << <DimGrid, DimBlock>> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]); //Aqui empieza la fiesta con CUDA. 
 				setCudaMemcpyToHost(tablero, tablero_cuda,  numThread);			// Trasferimos el tablero del GPU al HOST.
 				cudaFree(tablero_cuda);
+				/*if (error_play) {
+					ERROR_MSS("El movimento realizado no es valido.");
+					goto teclado;
+				}*/
 				cont++;
-				char car = getchar();
-				system("pause");
 			}
 		} else {
 			switch ((char)&input) {
@@ -288,7 +215,6 @@ int *getRowAndColumn(string jug, double numThread) {
 		if (isNotErrorColRow = (token > 0 && token <= (numThread / TAM_TESELA))) {
 			rowCol[cont] = token;
 		}
-		cout << token << endl;
 		aux.erase(0, pos + delimiter.length());
 		cont++;
 	}
