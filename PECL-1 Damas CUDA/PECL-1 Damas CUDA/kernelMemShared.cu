@@ -14,7 +14,11 @@
 			|-> 21 = inf-dech.
 */
 __global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int direcion) {
+<<<<<<< HEAD
 	__shared__ long Tabs[TAM_TESELA][TAM_TESELA];		// Matriz teselada en memoria compartida.
+=======
+	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];   // Matriz teselada en memoria compartida.
+>>>>>>> master
 	int Row = blockIdx.y * gridDim.y + threadIdx.y;		// Calculamos la fila de la matriz teselada.
 	int Col = blockIdx.x * gridDim.x + threadIdx.x;		// Calculamos la columna de la matriz teselada.
 	/*
@@ -25,12 +29,20 @@ __global__ void DamasBomPlay(long *Tab, int numThread, int row, int col, int dir
 		int width = numThread / TAM_TESELA;				// Calculamos el tamaño en funcion del ancho.
 		/*
 			Caragamos la matriz en la matriz teselada con coalalesesian y sin comflitos en
+<<<<<<< HEAD
 			bancos de memoria para las GPU 2.x y 3.x (Es un precarga de datos).
 		*/
 		for (size_t i = 0; i < width; i++) {
 			Tabs[threadIdx.y][threadIdx.x] = Tab[Row* numThread + (i*TAM_TESELA + threadIdx.x)];
 			Tabs[threadIdx.y][threadIdx.x] = Tab[(i*TAM_TESELA + threadIdx.y)* numThread + Col];
 		}
+=======
+			bancos de memoria para las GPU 2.x y 3.x.
+		*/
+		//for (size_t i = 0; i < TAM_TESELA; i+=(TAM_TESELA/4)) {
+			Tabs[threadIdx.y/* + i*/][threadIdx.x] = Tab[(Row/* + i*/)* width + Col];
+		//}
+>>>>>>> master
 		__syncthreads();
 		int tx = blockIdx.x * gridDim.x + row;			// Calculamos el indice x de la jugada en la matriz teselda.
 		int ty = blockIdx.y * gridDim.y + col;			// Calculamos el indice y de la jugada en la matriz teselda.
