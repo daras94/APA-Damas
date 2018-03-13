@@ -6,7 +6,10 @@
       <Filter>Juego</Filter>
     </CudaCompile>
     <CudaCompile Include="UtilGPU.cu">
-      <Filter>Utiles</Filter>
+      <Filter>Util</Filter>
+    </CudaCompile>
+    <CudaCompile Include="kernelMemShared.cu">
+      <Filter>Juego\kenels</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -14,24 +17,36 @@
     <ClInclude Include="tablero.cuh">
       <Filter>Juego</Filter>
     </ClInclude>
-    <ClInclude Include="UtilGPU.cuh">
-      <Filter>Utiles</Filter>
-    </ClInclude>
     <ClInclude Include="GPUCarasteristic.h">
-      <Filter>Utiles</Filter>
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilGPU.cuh">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Persistencia.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelMemShared.cuh">
+      <Filter>Juego\kenels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Utiles">
-      <UniqueIdentifier>{d06443c8-26be-442a-9fce-92f6fc0c3a21}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Juego">
-      <UniqueIdentifier>{f767891b-c2cf-4851-a78e-72e8abb94e02}</UniqueIdentifier>
+      <UniqueIdentifier>{52f841b7-492e-4f86-ae58-8a3bb95b72d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{f5979c72-39e4-4947-a525-3a0fab03c241}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juego\kenels">
+      <UniqueIdentifier>{2b52a1d5-270d-47c5-b5a6-32e9596b794e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GPUCarasteristic.cpp">
-      <Filter>Utiles</Filter>
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Persistencia.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
