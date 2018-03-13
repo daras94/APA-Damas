@@ -14,11 +14,13 @@ int main() {
 		cout << "/*" << setw(35) << " ---> { " << ANSI_COLOR_CYAN " MENU: Damas CUDA " ANSI_COLOR_RESET << " } <--- " << setw(26) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
 		cout << "/*" << setw(87) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "1" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU."		   << setw(21) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "2" ANSI_COLOR_RESET ") - Iniciar paratida establecer configuracion de tablero de forma manual." << setw(11) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "3" ANSI_COLOR_RESET ") - Iniciar partida damas interfaces grafica."							   << setw(39) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "4" ANSI_COLOR_RESET ") - Ver Carateristicas del Hardware de que dispones."					   << setw(30) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "5" ANSI_COLOR_RESET ") - Selecionar configuracion de otra GPU disponible."                      << setw(45) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "1" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "MEM SHARED"  ANSI_COLOR_RESET ")." << setw(8) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "2" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "PER BLOCK"   ANSI_COLOR_RESET ")." << setw(9) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "3" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "MEM & BLOCK" ANSI_COLOR_RESET ")." << setw(8) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "4" ANSI_COLOR_RESET ") - Iniciar paratida establecer configuracion de tablero de forma manual."     << setw(11) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "5" ANSI_COLOR_RESET ") - Iniciar partida damas interfaces grafica."							       << setw(39) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "6" ANSI_COLOR_RESET ") - Ver Carateristicas del Hardware de que dispones."					       << setw(30) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "7" ANSI_COLOR_RESET ") - Selecionar configuracion de otra GPU disponible."                          << setw(45) << "*/" << endl;
 		cout << "/*" << setw(87) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
 		fotterCarGPU(&devProp, selectGPU);
@@ -26,20 +28,28 @@ int main() {
 		cin >> opc;						// Entrada de texto por teclado.
 		switch (opc) {
 			case 1:
-				numThread = setGpuForPlayAuto(&devProp, &infoMyGPU, selectGPU);			// Llamamos a establecer la configuracion de la GPU.
-				dificultad = setDificultad();
-				playDamas(numThread, &infoMyGPU, dificultad);
-				break;
-			case 2: 
-
-				break;
+			case 2:
 			case 3:
+			case 4:
+				// Llamamos a establecer la configuracion de la partida con la GPU.
+				if (opc >= 1 && opc <= 3) {	
+					numThread = setGpuForPlayAuto(&devProp, &infoMyGPU, selectGPU);	// Modo Automatico.
+				} else {
+					numThread = setGpuForPlayManual(&devProp, &infoMyGPU, selectGPU);	// Modo MAnual.
+					cout << "/***************************************************************************************/" << endl;
+					cout << " - Selecione un kernel ( Mem-Shared = 1, Block = 2 y Mem & Block = 3): ";
+					cin >> opc;
+				}
+				dificultad = setDificultad();
+				playDamas(opc, numThread, &infoMyGPU, dificultad);
+				break;
+			case 5:
 
 				break;
-			case 4: 
-			case 5:
+			case 6: 
+			case 7:
 				echoCarGPUs(selectGPU, &devProp);
-				if (opc == 5) {
+				if (opc == 7) {
 					cudaDeviceProp devShow;								// struct de carrasteristicas de la GPU.
 					selectGpuCurrent(&devShow, &selectGPU);
 					getCofigPlay(selectGPU, &devProp, &infoMyGPU);		// Obtenemos los parametros de la gpu para realizar la configuracion de la gpu.

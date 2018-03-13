@@ -8,6 +8,9 @@
     <CudaCompile Include="UtilGPU.cu">
       <Filter>Util</Filter>
     </CudaCompile>
+    <CudaCompile Include="kernelMemShared.cu">
+      <Filter>Juego\kenels</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.cuh" />
@@ -23,6 +26,9 @@
     <ClInclude Include="Persistencia.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="KernelMemShared.cuh">
+      <Filter>Juego\kenels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Juego">
@@ -30,6 +36,9 @@
     </Filter>
     <Filter Include="Util">
       <UniqueIdentifier>{f5979c72-39e4-4947-a525-3a0fab03c241}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juego\kenels">
+      <UniqueIdentifier>{2b52a1d5-270d-47c5-b5a6-32e9596b794e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
