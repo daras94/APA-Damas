@@ -11,14 +11,10 @@
 #define TAM_TESELA 16			// tesela mas optima.
 #define POS_TAB_JUEGO_EMPTY 10	// Posicion del tablero vacia si niguna ficha.
 
-/*
-	Declaracion de macros para calcular la tesela para no liarla cuando la matrix
-	esta x debajo del tamaño de la tesela.
-*/
-#define TAM_TESELA_C(numThread) (TAM_TESELA/(((numThread/TAM_TESELA)>= TAM_TESELA)? 1 : 2));
 
 // Finciones y Metodos del Host.
-void launchKernelMemShared(double numThread, long* tablero, int* jugada, bool error_play);
+bool launchKernelMemShared(double numThread, long* tablero, int* jugada);
 
 // Funcion y metonos GPU
-__global__ void DamasBomPlay(long *tablero, int numthread, int row, int col, int direcion);
+__global__ void DamasBomPlay(long *tablero, int numthread, bool *error_play, int row, int col, int direcion);
+__device__ bool isCamarada(int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]);

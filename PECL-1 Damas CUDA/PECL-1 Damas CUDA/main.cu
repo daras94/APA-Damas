@@ -41,7 +41,9 @@ int main() {
 					cin >> opc;
 				}
 				dificultad = setDificultad();
-				playDamas(opc, numThread, &infoMyGPU, dificultad);
+				if (dificultad != 0) {
+					playDamas(opc, numThread, &infoMyGPU, dificultad);
+				}
 				break;
 			case 5:
 

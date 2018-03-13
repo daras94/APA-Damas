@@ -206,7 +206,6 @@ void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificu
 					goto teclado;
 				}
 				cont++;
-				system("pause");
 			}
 		} else {
 			switch ((char)&input) {
@@ -236,7 +235,7 @@ bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada) 
 	bool isErrorJugada = false;
 	switch (typeKernel) {
 		case 1:		// Memoria Compartida Con Colesencia y Teselada.
-			launchKernelMemShared(numThread, tablero, jugada, isErrorJugada);
+			isErrorJugada = launchKernelMemShared(numThread, tablero, jugada);
 			break;
 		case 2:		// Por Bloques.
 
@@ -259,13 +258,13 @@ int *getRowAndColumn(string jug, double numThread) {
 	bool isNotErrorColRow = true;
 	while ((pos = aux.find(delimiter)) != string::npos && isNotErrorColRow) {
 		int token = stoi(aux.substr(0, pos));
-		if (isNotErrorColRow = (token > 0 && token <= (numThread / TAM_TESELA))) {
+		isNotErrorColRow = (token > 0) && ((token <= (numThread / TAM_TESELA)) || (cont == 2));
+		if (isNotErrorColRow) {
 			rowCol[cont] = token;
+			cont++;
 		}
 		aux.erase(0, pos + delimiter.length());
-		cont++;
 	}
-
 	return rowCol;
 }
 

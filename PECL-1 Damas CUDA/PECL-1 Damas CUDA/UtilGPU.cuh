@@ -48,7 +48,8 @@ using namespace std;
 // Definicion de Macros para Calulo de cores de letra con Color de fondo A es el Color de le fondo y B del Testo.
 #define COLOR_TABLERO(B, F) B*16+F;
 
-// Declaracion de funciones y metodos.
+// Declaracion de funciones y metodos para el tablero.
 void setCudaMalloc(long*& dev, int size);
 void setCudaMemcpyToHost(long*& c, long*& dev, int size);
 void setCudaMemcpyToDevice(long*& c, long*& dev, int size);
+
