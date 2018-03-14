@@ -124,13 +124,18 @@ int setDificultad() {
 */
 long *generarTablero(double numThread, int dificultad) {
 	long row = 0, col = 0, *tablero = new long[(int)numThread];
-	int numRowFicha = log2(numThread / TAM_TESELA);			// El numero de fichas para cada jugador en funcion de las dimensiones del tablero.
+	/*
+		El numero de fichas para cada jugador en funcion de las dimensiones del tablero 
+		y lo multiplicamos por el doble para cuando nos salimos de las dimensiones con-
+		becionales de un tablero de damas.
+	*/
+	int numRowFicha = log2(numThread / TAM_TESELA) + (((numThread / TAM_TESELA) > 8)? 2 : 0);			
 	srand(time(NULL));
 	for (int i = 0; i < numThread; i++) { 
 		row = i / ((int)numThread / TAM_TESELA);			// Calculamos la columna 
 		col = ((row % 2) == 0)? 1 : 0;						// Calculamos el desplazamiento de la fichas en la colocacion.
-		int bonba = rand() % dificultad;				    // Gennera Bombas en funcion de las dificultad selecionada.
-		tablero[i] = (((col + i) % 2) == 0)? (row < numRowFicha)? 11 + bonba : POS_TAB_JUEGO_EMPTY : (row >= (numRowFicha * (numRowFicha - 1)))? 22 + bonba : POS_TAB_JUEGO_EMPTY;
+		int bonba = rand() % (dificultad + 2);				    // Gennera Bombas en funcion de las dificultad selecionada.
+		tablero[i] = (((col + i + ((row > numRowFicha)? 0 : 1)) % 2) == 0)? (row < numRowFicha)? 11 + bonba : POS_TAB_JUEGO_EMPTY : (row >= ((numThread/TAM_TESELA) - numRowFicha))? 22 + bonba : POS_TAB_JUEGO_EMPTY;
 	}
 	return tablero;
 }
@@ -155,11 +160,11 @@ void imprimirTablero(long *tablero, double numThread) {
 	imprimirColumnas(numThread);
 	for (int i = 0; i < numThread / TAM_TESELA; i++) {
 		cout << setw(4) << i+1 << setw(3) << "-" << setw(3) << "";
-		for (int k = 0; k < numThread/TAM_TESELA; k++) {								// Damos color en función del número imprimir
-			int background = ((i + k) % 2 == 0) ? COLOR_GRIS : COLOR_NEGRO;			// Color que contrulle el tablero.
+		for (int k = 0; k < numThread/TAM_TESELA; k++) {							// Damos color en función del número imprimir
+			int background = ((i + k) % 2 == 0) ? COLOR_BLANCO : COLOR_NEGRO;		// Color que contrulle el tablero.
 			long bloque = tablero[i * ((int)numThread / TAM_TESELA) + k];
-			//if (bloque < NUM_FICHAS) {												// Calculamos el color de la casilla.
-				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
+			//if (bloque < NUM_FICHAS) {											// Calculamos el color de la casilla.
+				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL_LIGHT, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 			//} 
 				cout << " " << (((bloque - (bloque % 10)) > POS_TAB_JUEGO_EMPTY)? "#" : "O") << " ";

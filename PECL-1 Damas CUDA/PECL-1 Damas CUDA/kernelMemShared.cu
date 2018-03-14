@@ -35,19 +35,49 @@ __global__ void DamasBomPlay(long *Tab, int numThread, bool *error_play, int row
 			Cuando encontramos el hilo que coincide con la jugada ejecutamos la jugada.
 		*/
 		if ((tx == Row) && (ty == Col)) {
-			int type_bom = Tabs[threadIdx.y][threadIdx.x] % 10;
-			int num_move = (type_bom > 2) ? type_bom : 1;
-			for (size_t i = 0; i < num_move; i++) {
-				int movV = threadIdx.x + (new int[2]{ -1, 1 })[(direcion % 10)];						// Determinamos el movimiento vertical en funcion de la direcion recibida
-				int movH = threadIdx.y + (new int[2]{ -1, 1 })[((direcion - (direcion % 10)) / 10) - 1];// Determinamos el movimiento Horizontal en funcion de la direcion recibida
-				*error_play = isCamarada(movV, movH, Tabs);												// Determinamos si es error de jugada y se lo comunicamos al host.
-				if (!*error_play) {
-					Tabs[movH][movV] = Tab[(tx)* width + (ty)];											// Insertamos la ficha en la nueva posicion.
-					Tabs[threadIdx.y][threadIdx.x] = POS_TAB_JUEGO_EMPTY;								// Ponemos en blanco la poscion previa de mi ficha.
+			int movV = (new int[2]{ -1, 1 })[(direcion % 10)];								// Determinamos el movimiento vertical en funcion de la direcion recibida
+			int movH = (new int[2]{ -1, 1 })[((direcion - (direcion % 10)) / 10) - 1];		// Determinamos el movimiento Horizontal en funcion de la direcion recibida
+			int type_bom = Tabs[threadIdx.y][threadIdx.x] % 10;								// Determinamos el tipo de bomaba de la que se trata.
+			bool isPacMan = false;															// la ficha se convierte en pacma cunado se encuentra una ficha contraria y se la come.
+			for (size_t i = 1; i <= ((type_bom > 2)? type_bom : 1); i++) {
+				/*
+					Determinamos si es error de jugada y se lo comunicamos al host o finaliza el 
+					recorido de una bomba las bombas abazan tantas casillas en diagonal como va-
+					lor de su tipo o asta que se convierta en pacman coman o se encuentre los li-
+					mites del tablero os ata encontrar una ficha amiga.
+				*/
+				if ((*error_play = isCamarada(i, movV, movH, Tabs)) && !isPacMan) {
+					isPacMan = (Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] != POS_TAB_JUEGO_EMPTY); // Determinamos si somos PacMAn
+					Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] = Tab[tx* width + ty];				  // Insertamos la ficha en la nueva posicion.
+					Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	  // Ponemos en blanco la poscion previa de mi ficha.
+				} else {
+					int posMovH = threadIdx.y + ((i - 1) * movH);
+					int posMovV = threadIdx.x + ((i - 1) * movV);
+					/*
+						Haber Tenemos 5 bombas que cuando la ficha se conbiertan en pacman o llequen
+						a los limites del tablero esplota (pudiendo crear alteraciones espaciales en
+						el tablero). COMENCEMOS!!!
+					*/
+					if (isPacMan || (posMovH == -1) || (posMovV == -1) || (posMovH > gridDim.y) || (posMovV > gridDim.x)) {
+						switch (type_bom) {
+							case 3:			// BOM Verde!!, 
+
+								break;
+							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
+								purpleBom(Tabs, posMovH, posMovV);
+								break;
+							case 7:			// BOM Amarillo!!, La Bomba de transposcicion no mata pero si altera las dimensiones.
+								isBomtraspose = true;
+								break;		
+						}
+						Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	  // Ponemos en blanco la poscion previa de mi ficha.
+						break;
+					}
 				}
-			}
+			}			
 		}
 		__syncthreads();
+		yellowBom(Tab, Tabs, Row, Col, width); // Ejecutamos la bomba de trasposicion si es el caso.
 		/*
 			Cargamos el contenido de las matrizes teselada (pre cargada)en nuestra matriz 
 			resultante.
@@ -56,15 +86,38 @@ __global__ void DamasBomPlay(long *Tab, int numThread, bool *error_play, int row
 	}
 }
 
+__device__ void yellowBom(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width) {
+	if (isBomtraspose) {
+		for (size_t j = 0; j < TAM_TESELA; j += gridDim.x) {
+			Tabs[threadIdx.x][threadIdx.y + j] = Tab[((x + j)* width + y)];
+		}
+	}
+}
+
+__device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y) {
+	if (x > gridDim.x) {
+		
+	} else if (y > gridDim.y){
+
+	}
+	for (size_t i = 0; i < ((x > gridDim.x)? 2 : 3); i++) {
+		int row = (y > gridDim.y) ? 0 : 1;
+		Tabs[(y + 1) + i][(x + 1)] = POS_TAB_JUEGO_EMPTY;
+		Tabs[(y + 1) + i][(x - 1)] = POS_TAB_JUEGO_EMPTY;
+	}
+}
+
+
 /*
 	Determina si el movimiento cuando encuentra una ficha en su camino la puede comer si
 	no es ficha amiga si es ficha amiga movimiento no valido;
 */
-__device__ bool isCamarada(int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]) {
-	bool isFriend = (movV != -1) && (movH != -1);
+__device__ bool isCamarada(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]) {
+	bool isFriend = ((threadIdx.y + (pos * movH)) != -1) && ((threadIdx.x + (pos * movV)) != -1) &&
+				    ((threadIdx.y + (pos * movH)) < gridDim.y) && ((threadIdx.x + (pos * movV)) < gridDim.x);
 	if (isFriend) {
-		long fichaInMov = Tabs[movH][movV];
-		isFriend = isFriend && (Tabs[threadIdx.y][threadIdx.x] == fichaInMov);
+		long fichaInMov = Tabs[threadIdx.y + (pos * movH)][threadIdx.y + (pos * movV)];
+		isFriend = isFriend && (Tabs[threadIdx.y + ((pos - 1) * movH)][threadIdx.x + ((pos - 1) * movV)] != fichaInMov);
 	}
 	return isFriend;
 }

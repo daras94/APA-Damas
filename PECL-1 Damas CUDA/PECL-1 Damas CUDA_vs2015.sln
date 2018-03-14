@@ -1,7 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 14.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PECL-1 Damas CUDA", "PECL-1 Damas CUDA\PECL-1 Damas CUDA_vs15.vcxproj", "{15A3A56B-5D19-4BEC-A2BB-4FAD9AAE7599}"
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PECL-1 Damas CUDA_vs15", "PECL-1 Damas CUDA\PECL-1 Damas CUDA_vs15.vcxproj", "{15A3A56B-5D19-4BEC-A2BB-4FAD9AAE7599}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

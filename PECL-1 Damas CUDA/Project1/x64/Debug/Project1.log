@@ -1,0 +1,6 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Project1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  MyForm.cpp
+  .NETFramework,Version=v4.5.2.AssemblyAttributes.cpp
+  MyForm.obj : /DEBUG:FASTLINK no se admite cuando hay presente código administrado; reiniciando vínculo con /DEBUG:FULL
+  Project1.vcxproj -> C:\Users\David\Documents\APA Programacion\APA-Damas\PECL-1 Damas CUDA\x64\Debug\PECL-1 Damas CUDA GUI.exe
+  Project1.vcxproj -> C:\Users\David\Documents\APA Programacion\APA-Damas\PECL-1 Damas CUDA\x64\Debug\PECL-1 Damas CUDA GUI.pdb (Partial PDB)
