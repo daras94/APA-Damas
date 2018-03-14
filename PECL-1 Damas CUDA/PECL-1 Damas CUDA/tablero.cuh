@@ -1,6 +1,7 @@
 #pragma once
 #include "UtilGPU.cuh"
 #include "KernelMemShared.cuh"
+#include "KernelMemGlobal.cuh"
 #include "GPUCarasteristic.h"
 #include <conio.h>
 #include <Windows.h>
@@ -35,5 +36,5 @@ long* generarTablero(double numThread, int dificultad);
 void imprimirTablero(long *tablero, double numThread);
 void imprimirColumnas(double numThread);
 void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificultad);
-int *getRowAndColumn(string jug, double numThread);
+int *getRowAndColumn(string jug, double numThread, string delimiter, int num_parametres);
 bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada);

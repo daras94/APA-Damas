@@ -71,7 +71,7 @@ double setGpuForPlayAuto(cudaDeviceProp *devProp,  info_gpu *myConfGpu, int devi
 		- deviceCurrent = Id de la GPU que actualmente tenemos selecionada como principal.
 */
 double setGpuForPlayManual(cudaDeviceProp *devProp, info_gpu *myConfGpu, int deviceCurrent) {
-	int imput, cont = 0; double dim = 1;
+	string imput = { NULL }; int  cont = 0; double dim = 0;
 	system("cls");
 	cout << "/***************************************************************************************/" << endl;
 	cout << "/*  +--> " << ANSI_COLOR_CYAN "Menu de configuracion de partida:" ANSI_COLOR_RESET << setw(47) << "*/" << endl;
@@ -83,12 +83,24 @@ double setGpuForPlayManual(cudaDeviceProp *devProp, info_gpu *myConfGpu, int dev
 	cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Cuidado con la configuracion quien rompe CUDA lo sufre." << setw(35) << "*/" << endl;
 	cout << "/***************************************************************************************/" << endl;
 	teclado:
-	cout << " - Introduca el numero de " << ((cont == 0)? "filas" : "Columnas") << " (" ANSI_COLOR_GREEN "0 para salir" ANSI_COLOR_RESET "): ";
+	cout << " - Introduca el numero las filas y columnas con el formato Ej: 16x16 (" ANSI_COLOR_GREEN "0 para salir" ANSI_COLOR_RESET "): ";
 	cin >> imput;		// Entrada de texto por teclado.
-	if (cont == 0 && imput != 0) {
-		dim = dim * imput;
-		cont++;
-		goto teclado;
+	smatch match;
+	regex  reg_expre{R"(\d{1,2}x\d{1,2})"};								// Epresion regular para las filas y columnas.
+	bool found = regex_match(imput, match, reg_expre);					// Coparacion que busca un expresion de tipo fila:columna:direccion
+	if (found) {
+		int *jugada = getRowAndColumn(imput, myConfGpu -> numThreadMasPerBlock, "x", 2);
+		if (sizeof(jugada) < NUM_DIMENSION_TAB) {
+			ERROR_MSS("Error en la columna o fila introducida.");
+			goto teclado;
+		} else {
+			dim = (jugada[0] * jugada[1]);
+		}
+	} else {
+		if (imput != "0") {
+			ERROR_MSS("Carrates no reconocido pruebe de nuevo o rango escedido.");
+			goto teclado;
+		}
 	}
 	return dim;
 }
@@ -123,19 +135,21 @@ int setDificultad() {
 	Generamos el tablero con un números de bonbas aleatorios en función de la dificultad.
 */
 long *generarTablero(double numThread, int dificultad) {
-	long row = 0, col = 0, *tablero = new long[(int)numThread];
+	int cont = 0, tam = (((int)numThread) / TAM_TESELA);
+	long row = 0, col = 0, *tablero = new long[(tam * tam)];
+	
 	/*
 		El numero de fichas para cada jugador en funcion de las dimensiones del tablero 
 		y lo multiplicamos por el doble para cuando nos salimos de las dimensiones con-
 		becionales de un tablero de damas.
 	*/
-	int numRowFicha = log2(numThread / TAM_TESELA) + (((numThread / TAM_TESELA) > 8)? 2 : 0);			
+	int numRowFicha = log2(tam) + ((tam > 8)? 2 : 0);			
 	srand(time(NULL));
-	for (int i = 0; i < numThread; i++) { 
-		row = i / ((int)numThread / TAM_TESELA);			// Calculamos la columna 
-		col = ((row % 2) == 0)? 1 : 0;						// Calculamos el desplazamiento de la fichas en la colocacion.
-		int bonba = rand() % (dificultad + 2);				    // Gennera Bombas en funcion de las dificultad selecionada.
-		tablero[i] = (((col + i + ((row > numRowFicha)? 0 : 1)) % 2) == 0)? (row < numRowFicha)? 11 + bonba : POS_TAB_JUEGO_EMPTY : (row >= ((numThread/TAM_TESELA) - numRowFicha))? 22 + bonba : POS_TAB_JUEGO_EMPTY;
+	for (size_t i = 0; i < tam; i++) {
+		for (size_t j = 0; j < tam; j++) {
+			int bom = rand() % (dificultad + 2);				    // Gennera Bombas en funcion de las dificultad selecionada.
+			tablero[(i * tam + j)] = (((i + j + ((i > numRowFicha) ? 0 : 1))% 2 == 0)? ((i < numRowFicha)? 11 + bom : POS_TAB_JUEGO_EMPTY) : ((i >= (tam - numRowFicha))? 22 + bom : POS_TAB_JUEGO_EMPTY));
+		}	
 	}
 	return tablero;
 }
@@ -158,16 +172,16 @@ void imprimirColumnas(double numThread) {
 //Imprimimos el tablero
 void imprimirTablero(long *tablero, double numThread) {
 	imprimirColumnas(numThread);
-	for (int i = 0; i < numThread / TAM_TESELA; i++) {
+	for (size_t i = 0; i < numThread / TAM_TESELA; i++) {
 		cout << setw(4) << i+1 << setw(3) << "-" << setw(3) << "";
-		for (int k = 0; k < numThread/TAM_TESELA; k++) {							// Damos color en función del número imprimir
+		for (size_t k = 0; k < numThread/TAM_TESELA; k++) {							// Damos color en función del número imprimir
 			int background = ((i + k) % 2 == 0) ? COLOR_BLANCO : COLOR_NEGRO;		// Color que contrulle el tablero.
-			long bloque = tablero[i * ((int)numThread / TAM_TESELA) + k];
+			int bloque = tablero[(i * (((int)numThread) / TAM_TESELA) + k)];
 			//if (bloque < NUM_FICHAS) {											// Calculamos el color de la casilla.
 				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL_LIGHT, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 			//} 
-				cout << " " << (((bloque - (bloque % 10)) > POS_TAB_JUEGO_EMPTY)? "#" : "O") << " ";
+			cout << " " << (((bloque - (bloque % 10)) > POS_TAB_JUEGO_EMPTY)? "#" : "O") << " ";
 		}
 		cout << ANSI_COLOR_RESET "" << endl;
 	}
@@ -200,7 +214,7 @@ void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificu
 		regex  reg_expre{R"(\d{1,2}:\d{1,2}:(1|2){1}(0|1){1})"};				// Epresion regular para las filas y columnas.
 		bool found = regex_match(input, match, reg_expre);						// Coparacion que busca un expresion de tipo fila:columna:direccion
 		if (found) {
-			int *jugada = getRowAndColumn(input, numThread);
+			int *jugada = getRowAndColumn(input, numThread, ":", NUM_DIMENSION);
 			if (sizeof(jugada) < NUM_DIMENSION_TAB) {
 				ERROR_MSS("Error en la columna o fila introducida.");
 				goto teclado;
@@ -210,6 +224,7 @@ void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificu
 					ERROR_MSS("El movimento realizado no es valido.");
 					goto teclado;
 				}
+				system("pause");
 				cont++;
 			}
 		} else {
@@ -243,10 +258,10 @@ bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada) 
 			isErrorJugada = launchKernelMemShared(numThread, tablero, jugada);
 			break;
 		case 2:		// Por Bloques.
-
+			//isErrorJugada = launchKernelMultiBlock(numThread, tablero, jugada);
 			break;
-		case 3:		// Por Bloques Con Memoria Compartida.
-
+		case 3:		// Por Bloques Memoria global.
+			isErrorJugada = launchKernelMemGlobal(numThread, tablero, jugada);
 			break;
 	}
 	return isErrorJugada;
@@ -254,12 +269,13 @@ bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada) 
 
 /*
 	Realiza el Separado de los valores de la jugada pasada en el formato C:F:D 
-	(C = Columna, F = Fila, D = Direcion) y debuelve la jugada como un array 
-	de enteros. 
+	(C = Columna, F = Fila, D = Direcion) o la configuracion de filas columnas
+	y debuelve la jugada como un array de enteros. 
 */
-int *getRowAndColumn(string jug, double numThread) {
-	string delimiter = ":", aux = jug + ":";
-	int pos = 0, cont = 0, *rowCol = new int[NUM_DIMENSION_TAB];
+int *getRowAndColumn(string jug, double numThread, string delimiter, int num_parametres) {
+	string aux = jug + delimiter;
+	size_t pos = 0, cont = 0;
+	int *rowCol = new int[num_parametres];
 	bool isNotErrorColRow = true;
 	while ((pos = aux.find(delimiter)) != string::npos && isNotErrorColRow) {
 		int token = stoi(aux.substr(0, pos));

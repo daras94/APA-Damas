@@ -12,13 +12,13 @@
 #define POS_TAB_JUEGO_EMPTY 10	// Posicion del tablero vacia si niguna ficha.
 
 // Definicion de variables globales.
-__device__ bool isBomtraspose = false;
+__device__ bool isBomtrasposeSharedMem = false;
 
 // Finciones y Metodos del Host.
 bool launchKernelMemShared(double numThread, long* tablero, int* jugada);
 
 // Funcion y metonos GPU
-__global__ void DamasBomPlay(long *tablero, int numthread, bool *error_play, int row, int col, int direcion);
-__device__ bool isCamarada(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]);
-__device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y);
+__global__ void DamasBomPlayMemShared(long *tablero, int numthread, bool *error_play, int row, int col, int direcion);
+__device__ bool isCamaradaGlobal(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]);
+__device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int y, int x);
 __device__ void yellowBom(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width);

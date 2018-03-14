@@ -11,6 +11,9 @@
     <CudaCompile Include="kernelMemShared.cu">
       <Filter>Juego\kenels</Filter>
     </CudaCompile>
+    <CudaCompile Include="KernelMemGlobal.cu">
+      <Filter>Juego\kenels</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.cuh" />
@@ -29,6 +32,9 @@
     <ClInclude Include="KernelMemShared.cuh">
       <Filter>Juego\kenels</Filter>
     </ClInclude>
+    <ClInclude Include="KernelMemGlobal.cuh">
+      <Filter>Juego\kenels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Juego">
@@ -40,6 +46,9 @@
     <Filter Include="Juego\kenels">
       <UniqueIdentifier>{2b52a1d5-270d-47c5-b5a6-32e9596b794e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juego\GUI">
+      <UniqueIdentifier>{edde2991-c13c-429d-830c-4b95e24c8830}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GPUCarasteristic.cpp">
@@ -47,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="Persistencia.cpp">
       <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Interface.cpp">
+      <Filter>Juego\GUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
