@@ -53,11 +53,11 @@ void selectGpuCurrent(cudaDeviceProp *devProp, int *devianCurrent) {
 	if (!getDevCuda(&deviceCont)) {
 		bool isSelectGPUValide = false;
 		do {
-			cout << " - Selecione una GPU (" ANSI_COLOR_GREEN "Pulse 0 para salir sin canbios" ANSI_COLOR_RESET "): ";
+			cout << " - Seleccione una GPU (" ANSI_COLOR_GREEN "Pulse 0 para salir sin cambios" ANSI_COLOR_RESET "): ";
 			cin >> opc;		// Entrada de texto por teclado.
 			isSelectGPUValide = (opc > 0 && opc <= deviceCont + 1);
 			if (opc != 0 && !isSelectGPUValide) {
-				ERROR_MSS("Error opcion de juego introducida no es valida.");
+				ERROR_MSS("Error: la opcion de juego introducida no es valida.");
 			}
 		} while (opc != 0 && !isSelectGPUValide);
 		*devianCurrent = opc;
@@ -80,7 +80,7 @@ void fotterCarGPU(cudaDeviceProp *devProp, int deviceCurren) {
 			cout << "/*  " << " - Capability: " << copCapVer << setw(70 - copCapVer.length()) << " - CUDA Runtime Ver: " << runtimVer << setw(26 - runtimVer.length()) << "*/" << endl;
 		}
 		else {
-			string error = "Su Host no dipone de un dispositivo preparado para soportar CUDA.";
+			string error = "Su host no dipone de un dispositivo preparado para soportar CUDA.";
 			cout << "/*" << setw(5) << ANSI_COLOR_RED " - ERROR: " << ANSI_COLOR_RESET << error << setw(65 - error.length()) << "*/" << endl;
 		}
 		cout << "/***************************************************************************************/" << endl;

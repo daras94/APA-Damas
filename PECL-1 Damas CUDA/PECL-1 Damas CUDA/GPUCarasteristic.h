@@ -2,7 +2,7 @@
 #include "UtilGPU.cuh"
 #include <stdio.h>
 
-// Declaracion de variables Globales.
+// Declaracion de variables globales.
 
 // definicion de funciones y metodos.
 void getCarrasteristicForGPU(cudaDeviceProp *devProp);

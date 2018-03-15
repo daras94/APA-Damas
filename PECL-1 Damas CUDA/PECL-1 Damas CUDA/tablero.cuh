@@ -12,13 +12,13 @@
 // Declaracion de constantes.
 #define TAM_TESELA 16			// tesela mas optima.
 #define NUM_DIMENSION 3			// Numero de dimesiones posibles en la GPU.
-#define NUM_DIMENSION_TAB 3		// Numero de dimesiones del tablero de juego + la direcion de la jugada de la diagoonal.
+#define NUM_DIMENSION_TAB 3		// Numero de dimesiones del tablero de juego + la direccion de la jugada de la diagonal.
 #define NIVEL_DIFICULTAD 5		// Numeros de niveles de dificultad
-#define POS_TAB_JUEGO_EMPTY 10	// Posicion del tablero vacia si niguna ficha.
+#define POS_TAB_JUEGO_EMPTY 10	// Posicion del tablero vacia si ninguna ficha.
 #define NUM_FICHAS	9
 
 
-// Declaracion de strut para alamacenar info gpu para su configuracion
+// Declaracion de strut para alamacenar info de la gpu para su configuracion
 typedef struct InfoGPU {
 	double numThreadMaxPerSM;
 	double numThreadMasPerBlock;

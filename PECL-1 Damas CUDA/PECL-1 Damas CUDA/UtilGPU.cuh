@@ -42,6 +42,8 @@ using namespace std;
 #define COLOR_AMARILLO_LIGHT 14
 #define COLOR_BLACO_LIGHT 15
 
+
+
 // Definicion de macro para errores.
 #define ERROR_MSS(A)	cout << ANSI_COLOR_RED " - ERROR:" ANSI_COLOR_RESET << A << endl;
 

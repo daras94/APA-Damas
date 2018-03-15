@@ -158,6 +158,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="tableroGUI.cu" />
     <CudaCompile Include="KernelMemGlobal.cu" />
     <CudaCompile Include="kernelMemShared.cu" />
     <CudaCompile Include="KernelMultiBlock.cu" />
@@ -166,13 +167,23 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile Include="UtilGPU.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="book.h" />
+    <ClInclude Include="cpu_anim.h" />
+    <ClInclude Include="cpu_bitmap.h" />
+    <ClInclude Include="GL\glext.h" />
+    <ClInclude Include="GL\glut.h" />
+    <ClInclude Include="gl_helper.h" />
     <ClInclude Include="GPUCarasteristic.h" />
+    <ClInclude Include="gpu_anim.h" />
+    <ClInclude Include="Header.h" />
     <ClInclude Include="KernelMemGlobal.cuh" />
     <ClInclude Include="KernelMemShared.cuh" />
     <ClInclude Include="KernelMultiBlock.cuh" />
     <ClInclude Include="main.cuh" />
     <ClInclude Include="Persistencia.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="tablero.cuh" />
+    <ClInclude Include="tableroGUI.cuh" />
     <ClInclude Include="UtilGPU.cuh" />
   </ItemGroup>
   <ItemGroup>
