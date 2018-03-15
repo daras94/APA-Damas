@@ -174,7 +174,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="UtilGPU.cuh" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D:\Interface.cpp" />
     <ClCompile Include="GPUCarasteristic.cpp" />
     <ClCompile Include="Persistencia.cpp" />
   </ItemGroup>

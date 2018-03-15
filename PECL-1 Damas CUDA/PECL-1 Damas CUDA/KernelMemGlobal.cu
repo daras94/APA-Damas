@@ -15,7 +15,7 @@ Kernel de ejecucion con memoria cOMPRATIDA TESELaDA Y COALECENCIA.
 __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col, int direcion) {
 	int ty = threadIdx.y;		// Identificador de hilo del eje Y.
 	int tx = threadIdx.x;		// Identificador de hilo del eje X.
-	int width = numthread / gridDim.x;
+	int width = numthread / TAM_TESELA;
 	if ((ty < width) && (tx < width)) {
 		/*
 			Cuando encontramos el hilo que coincide con la jugada ejecutamos la jugada.
@@ -26,6 +26,7 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 			int type_bom = Tab[ty * width + tx] % 10;										// Determinamos el tipo de bomaba de la que se trata.
 			bool isPacMan = false;															// la ficha se convierte en pacma cunado se encuentra una ficha contraria y se la come.
 			for (size_t i = 1; i <= ((type_bom > 2) ? type_bom : 1); i++) {
+				isBomtrasposeGlobalMem = false;	// Desactivamos las bombas de trasposicion para que su efecto solo dure una jugada.
 				/*
 					Determinamos si es error de jugada y se lo comunicamos al host o finaliza el
 					recorido de una bomba las bombas abazan tantas casillas en diagonal como va-
@@ -33,9 +34,9 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 					mites del tablero os ata encontrar una ficha amiga.
 				*/
 				if (isCamaradaGlobal(i, movV, movH, Tab, width) && !isPacMan) {
-					isPacMan = (Tab[(ty + (i * movH))* width + (tx + (i * movV))] != POS_TAB_JUEGO_EMPTY);	// Determinamos si somos PacMAn
-					Tab[(ty + (i * movH))* width + (tx + (i * movV))] = Tab[tx* width + ty];				// Insertamos la ficha en la nueva posicion.
-					Tab[(ty + ((i - 1) * movH))* width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;	// Ponemos en blanco la poscion previa de mi ficha.
+					isPacMan = (Tab[(ty + (i * movH))* width + (tx + (i * movV))] != POS_TAB_JUEGO_EMPTY);								  // Determinamos si somos PacMAn
+					Tab[(ty + (i * movH))* width + (tx + (i * movV))] = Tab[(row + ((i - 1) * movH)) * width + (col +((i - 1) * movV))];  // Insertamos la ficha en la nueva posicion.
+					Tab[(ty + ((i - 1) * movH))* width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;								  // Ponemos en blanco la poscion previa de mi ficha.
 				} else {
 					int posMov = (threadIdx.y + (i * movH)) * width + (threadIdx.x + (i * movV));
 					/*
@@ -47,11 +48,13 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 						switch (type_bom) {
 							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
 								purpleBom(Tab, movH, movV, width);
-								Tab[(ty + ((i - 1) * movH)) * width + (ty + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
+								printf(ANSI_COLOR_GREEN " BOM Purple, Radial BOM!!" ANSI_COLOR_RESET "\n");
+								Tab[(ty + ((i - 1) * movH)) * width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
 								break;
-							case 7:			// BOM Amarillo!!, La Bomba de transposcicion no mata pero si altera las dimensiones.
+							case 7:			// BOM Rosita!!, La Bomba de transposcicion no mata pero si altera las dimensiones.
 								isBomtrasposeGlobalMem = true;
-								Tab[(ty + ((i - 1) * movH)) * width + (ty + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
+								printf(ANSI_COLOR_GREEN " BOM Rose, traspose BOM!!" ANSI_COLOR_RESET "\n");
+								Tab[(ty + ((i - 1) * movH)) * width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
 								break;
 						}
 					}
@@ -74,7 +77,7 @@ __device__ void yellowBom(long *Tab, int x, int y, int width) { // Si me da tiem
 
 __device__ void purpleBom(long *Tab, int x, int y, int width) {
 	long fichaInMov = Tab[x * width * y];
-	for (size_t i = 0; i < ((x > gridDim.x) ? 3 : 4); i++) {
+	for (size_t i = 0; i < ((x > gridDim.x) ? 2 : 3); i++) {
 		int row = (y > gridDim.y) ? 0 : 1;
 		for (size_t j = 0; j < 2; j++) {
 			int victimas = Tab[((y + row) + i) * width + (x + (new int[2]{ 1, -1 })[j])];

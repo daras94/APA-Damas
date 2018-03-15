@@ -148,7 +148,7 @@ long *generarTablero(double numThread, int dificultad) {
 	for (size_t i = 0; i < tam; i++) {
 		for (size_t j = 0; j < tam; j++) {
 			int bom = rand() % (dificultad + 2);				    // Gennera Bombas en funcion de las dificultad selecionada.
-			tablero[(i * tam + j)] = (((i + j + ((i > numRowFicha) ? 0 : 1))% 2 == 0)? ((i < numRowFicha)? 11 + bom : POS_TAB_JUEGO_EMPTY) : ((i >= (tam - numRowFicha))? 22 + bom : POS_TAB_JUEGO_EMPTY));
+			tablero[(i * tam + j)] = (((i + j + ((i > numRowFicha) ? 0 : 1))% 2 == 0)? ((i < numRowFicha)? 31 + bom : POS_TAB_JUEGO_EMPTY) : ((i >= (tam - numRowFicha))? 22 + bom : POS_TAB_JUEGO_EMPTY));
 		}	
 	}
 	return tablero;
@@ -181,7 +181,7 @@ void imprimirTablero(long *tablero, double numThread) {
 				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL_LIGHT, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 			//} 
-			cout << " " << (((bloque - (bloque % 10)) > POS_TAB_JUEGO_EMPTY)? "#" : "O") << " ";
+			cout << " " << (((bloque - (bloque % 10)) > POS_TAB_JUEGO_EMPTY * 2)? "#" : "O") << " ";
 		}
 		cout << ANSI_COLOR_RESET "" << endl;
 	}

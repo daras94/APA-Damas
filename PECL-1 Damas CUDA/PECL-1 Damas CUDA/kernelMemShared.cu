@@ -13,7 +13,7 @@
 			|-> 11 = sup-dech.
 			|-> 21 = inf-dech.
 */
-__global__ void DamasBomPlayMemShared(long *Tab, int numThread, bool *error_play, int row, int col, int direcion) {
+__global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col, int direcion) {
 	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];   // Matriz teselada en memoria compartida.
 	int Row = blockIdx.y * gridDim.y + threadIdx.y;	// Calculamos la fila de la matriz teselada.
 	int Col = blockIdx.x * gridDim.x + threadIdx.x;	// Calculamos la columna de la matriz teselada.
@@ -40,15 +40,16 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, bool *error_play
 			int type_bom = Tabs[threadIdx.y][threadIdx.x] % 10;								// Determinamos el tipo de bomaba de la que se trata.
 			bool isPacMan = false;															// la ficha se convierte en pacma cunado se encuentra una ficha contraria y se la come.
 			for (size_t i = 1; i <= ((type_bom > 2)? type_bom : 1); i++) {
+				isBomtrasposeSharedMem = false;	// Desactivamos las bombas de trasposicion para que su efecto solo dure una jugada.
 				/*
 					Determinamos si es error de jugada y se lo comunicamos al host o finaliza el 
 					recorido de una bomba las bombas abazan tantas casillas en diagonal como va-
 					lor de su tipo o asta que se convierta en pacman coman o se encuentre los li-
 					mites del tablero os ata encontrar una ficha amiga.
 				*/
-				if ((*error_play = isCamaradaGlobal(i, movV, movH, Tabs)) && !isPacMan) {
+				if (isCamaradaShared(i, movV, movH, Tabs) && !isPacMan) {
 					isPacMan = (Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] != POS_TAB_JUEGO_EMPTY); // Determinamos si somos PacMAn
-					Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] = Tab[tx* width + ty];				  // Insertamos la ficha en la nueva posicion.
+					Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] = Tab[tx  * width + ty];			  // Insertamos la ficha en la nueva posicion.
 					Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	  // Ponemos en blanco la poscion previa de mi ficha.
 				} else {
 					int posMovH = threadIdx.y + (i * movH);
@@ -58,17 +59,20 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, bool *error_play
 						a los limites del tablero esplota (pudiendo crear alteraciones espaciales en
 						el tablero). COMENCEMOS!!!
 					*/
-					if (isPacMan || ((posMovH < 0) || (posMovV < 0)) || ((posMovH > gridDim.y) || (posMovV > gridDim.x))) {
+					if (isPacMan /*|| ((posMovH < 0) || (posMovV < 0)) || ((posMovH > gridDim.y) || (posMovV > gridDim.x))*/) {
 						switch (type_bom) {
 							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
 								purpleBom(Tabs, posMovH, posMovV);
+								printf(ANSI_COLOR_GREEN " - BOM Purple, Radial BOM!!" ANSI_COLOR_RESET "\n");
 								Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	
 								break;
-							case 7:			// BOM Amarillo!!, La Bomba de transposcicion no mata pero si altera las dimensiones.
+							case 7:			// BOM Rosa!!, La Bomba de transposcicion no mata pero si altera las dimensiones.
 								isBomtrasposeSharedMem = true;
+								printf(ANSI_COLOR_GREEN " - BOM Rose, traspose BOM!!" ANSI_COLOR_RESET "\n");
 								Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	
 								break;		
 						}
+						break;
 					}
 				}
 			}			
@@ -107,7 +111,7 @@ __device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y) {
 	Determina si el movimiento cuando encuentra una ficha en su camino la puede comer si
 	no es ficha amiga si es ficha amiga movimiento no valido;
 */
-__device__ bool isCamaradaGlobal(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]) {
+__device__ bool isCamaradaShared(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]) {
 	bool isFriend = ((threadIdx.y + (pos * movH)) != -1) && ((threadIdx.x + (pos * movV)) != -1) &&
 				    ((threadIdx.y + (pos * movH)) < gridDim.y) && ((threadIdx.x + (pos * movV)) < gridDim.x);
 	if (isFriend) {
@@ -127,9 +131,7 @@ __device__ bool isCamaradaGlobal(int pos, int movV, int movH, long Tabs[TAM_TESE
 		- error_play = Bolean pasado por referencia para notificar errores de jugada realizados. 
 */
 bool launchKernelMemShared(double numThread, long* tablero, int* jugada) {
-	bool  *error_play_c, error_play = true;
-	cudaMalloc((void **)&error_play_c, sizeof(bool));
-	cudaMemcpy(error_play_c, &error_play, sizeof(bool), cudaMemcpyHostToDevice);
+	bool  error_play = true;
 	long *tablero_cuda;
 	setCudaMalloc(tablero_cuda, ((int)numThread));							// Reservamos espacio de memoria para el tablero en la GPU.
 	setCudaMemcpyToDevice(tablero_cuda, tablero, ((int)numThread));		// Tranferimos el tablero a la GPU.
@@ -138,9 +140,8 @@ bool launchKernelMemShared(double numThread, long* tablero, int* jugada) {
 	/*
 		Aqui empieza la fiesta con CUDA, y mi total y asoluta faltas de hora de sueño SORPRISE.
 	*/
-	DamasBomPlayMemShared <<<dimGrid_c, dimBlock_c >> > (tablero_cuda, ((int)numThread), error_play_c, jugada[1] - 1, jugada[0] - 1, jugada[2]);
+	DamasBomPlayMemShared <<<dimGrid_c, dimBlock_c >> > (tablero_cuda, ((int)numThread), jugada[1] - 1, jugada[0] - 1, jugada[2]);
 	setCudaMemcpyToHost(tablero, tablero_cuda, (int)numThread);			// Trasferimos el tablero del GPU al HOST.
-	cudaMemcpy(&error_play, error_play_c, sizeof(bool), cudaMemcpyDeviceToHost);
 	cudaFree(tablero_cuda);											// Liberamos memoria llamamos al recolector de basura.
 	return false/*error_play*/;
 }

@@ -15,8 +15,8 @@ int main() {
 		cout << "/***************************************************************************************/" << endl;
 		cout << "/*" << setw(87) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "1" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "MEM SHARED"  ANSI_COLOR_RESET ")." << setw(8) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "2" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "PER BLOCK"   ANSI_COLOR_RESET ")." << setw(9) << "*/" << endl;
-		cout << "/*  " ANSI_COLOR_MAGENTA "3" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "MEM & BLOCK" ANSI_COLOR_RESET ")." << setw(8) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "2" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "MULTY BLOCK" ANSI_COLOR_RESET ")." << setw(9) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "3" ANSI_COLOR_RESET ") - Iniciar partida y configurar tablero en funcion del HW GPU (" ANSI_COLOR_GREEN "MEM GLOBAL"  ANSI_COLOR_RESET ")." << setw(8) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "4" ANSI_COLOR_RESET ") - Iniciar paratida establecer configuracion de tablero de forma manual."     << setw(11) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "5" ANSI_COLOR_RESET ") - Iniciar partida damas interfaces grafica."							       << setw(39) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "6" ANSI_COLOR_RESET ") - Ver Carateristicas del Hardware de que dispones."					       << setw(30) << "*/" << endl;

@@ -57,8 +57,5 @@
     <ClCompile Include="Persistencia.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="D:\Interface.cpp">
-      <Filter>Juego\GUI</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
