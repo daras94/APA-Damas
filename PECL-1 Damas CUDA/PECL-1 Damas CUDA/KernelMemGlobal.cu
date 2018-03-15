@@ -26,27 +26,27 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 			int type_bom = Tab[ty * width + tx] % 10;										// Determinamos el tipo de bomaba de la que se trata.
 			bool isPacMan = false;															// la ficha se convierte en pacma cunado se encuentra una ficha contraria y se la come.
 			for (size_t i = 1; i <= ((type_bom > 2) ? type_bom : 1); i++) {
+				isBomtrasposeGlobalMem = false;	// Desactivamos las bombas de trasposicion para que su efecto solo dure una jugada.
 				/*
 					Determinamos si es error de jugada y se lo comunicamos al host o finaliza el
 					recorido de una bomba las bombas abazan tantas casillas en diagonal como va-
 					lor de su tipo o asta que se convierta en pacman coman o se encuentre los li-
 					mites del tablero os ata encontrar una ficha amiga.
 				*/
-				if (isCamaradaGlobalMem(i, movV, movH, Tab, width) && !isPacMan) {
+				if (isCamaradaGlobalMem(tx, ty, i, movV, movH, Tab, width) && !isPacMan) {
 					isPacMan = (Tab[(ty + (i * movH))* width + (tx + (i * movV))] != POS_TAB_JUEGO_EMPTY);								  // Determinamos si somos PacMAn
-					Tab[(ty + (i * movH))* width + (tx + (i * movV))] = Tab[(row + ((i - 1) * movH)) * width + (col +((i - 1) * movV))];  // Insertamos la ficha en la nueva posicion.
+					Tab[(ty + (i * movH))* width + (tx + (i * movV))] = Tab[(row + ((i - 1) * movV)) * width + (col +((i - 1) * movH))];  // Insertamos la ficha en la nueva posicion.
 					Tab[(ty + ((i - 1) * movH))* width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;								  // Ponemos en blanco la poscion previa de mi ficha.
 				} else {
-					int posMov = (threadIdx.y + (i * movH)) * width + (threadIdx.x + (i * movV));
 					/*
 						Haber Tenemos 5 bombas que cuando la ficha se conbiertan en pacman o llequen
 						a los limites del tablero esplota (pudiendo crear alteraciones espaciales en
 						el tablero). COMENCEMOS!!!
 					*/
-					if (isPacMan || ((posMov < 0) || (posMov > (width * width)))) {
+					if (isPacMan && ((tx + ((i - 1) * movH) > -1) && (ty + ((i - 1) * movV) < width))) {
 						switch (type_bom) {
 							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
-								purpleBomGlobalMem(Tab, movH, movV, width);
+								purpleBomGlobalMem(tx, ty, Tab, movH, movV, width);
 								printf(ANSI_COLOR_GREEN " BOM Purple, Radial BOM!!" ANSI_COLOR_RESET "\n");
 								Tab[(ty + ((i - 1) * movH)) * width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
 								break;
@@ -66,7 +66,6 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 				resultante, ademas puede generar la bomba de trasposicion si esta es activada.
 			*/
 			Tab[(ty * width + tx)] = Tab[((isBomtrasposeGlobalMem) ? threadIdx.x : threadIdx.y) * width + ((isBomtrasposeGlobalMem) ? threadIdx.y : threadIdx.x)];
-			isBomtrasposeGlobalMem = false;	// Desactivamos las bombas de trasposicion para que su efecto solo dure una jugada.
 		}
 	}
 }
@@ -77,10 +76,10 @@ __device__ void yellowBomGlobalMem(long *Tab, int x, int y, int width) { // Si m
 	}
 }
 
-__device__ void purpleBomGlobalMem(long *Tab, int x, int y, int width) {
+__device__ void purpleBomGlobalMem(int Col, int Row, long *Tab, int x, int y, int width) {
 	long fichaInMov = Tab[x * width * y];
-	for (size_t i = 0; i < ((x > gridDim.x) ? 2 : 3); i++) {
-		int row = (y > gridDim.y) ? 0 : 1;
+	for (size_t i = 0; i < ((x > -1 && x < width) ? 3 : 2); i++) {
+		int row = (y > -1 && y < width) ? 0 : 1;
 		for (size_t j = 0; j < 2; j++) {
 			int victimas = Tab[((y + row) + i) * width + (x + (new int[2]{ 1, -1 })[j])];
 			if ((victimas - (victimas % 10)) != (fichaInMov - (fichaInMov % 10))) {
@@ -96,9 +95,9 @@ __device__ void purpleBomGlobalMem(long *Tab, int x, int y, int width) {
 	Determina si el movimiento cuando encuentra una ficha en su camino la puede comer si
 	no es ficha amiga si es ficha amiga movimiento no valido;
 */
-__device__ bool isCamaradaGlobalMem(int pos, int movV, int movH, long *Tab, int width) {
-	bool isFriend = ((threadIdx.y + (pos * movH))* width + (threadIdx.x + (pos * movV)) != -1) &&
-					((threadIdx.y + (pos * movH))* width + (threadIdx.x + (pos * movV))  < (width * width));
+__device__ bool isCamaradaGlobalMem(int col, int row, int pos, int movV, int movH, long *Tab, int width) {
+	bool isFriend = ((col + (pos * movH) > -1) && (col + (pos * movH) < width)) &&
+					((row + (pos * movV) > -1) && (row + (pos * movV) < width));
 	if (isFriend) {
 		long fichaInMov = Tab[(threadIdx.y + (pos * movH)) * width + (threadIdx.x + (pos * movV))];
 		long fichaVictima = Tab[(threadIdx.y + ((pos - 1) * movH)) * width + (threadIdx.x + ((pos - 1) * movV))];
