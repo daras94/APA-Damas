@@ -258,7 +258,7 @@ bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada) 
 			isErrorJugada = launchKernelMemShared(numThread, tablero, jugada);
 			break;
 		case 2:		// Por Bloques.
-			//isErrorJugada = launchKernelMultiBlock(numThread, tablero, jugada);
+			isErrorJugada = launchKernelMultyBlock(numThread, tablero, jugada);
 			break;
 		case 3:		// Por Bloques Memoria global.
 			isErrorJugada = launchKernelMemGlobal(numThread, tablero, jugada);

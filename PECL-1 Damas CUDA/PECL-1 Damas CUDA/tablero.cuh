@@ -2,6 +2,7 @@
 #include "UtilGPU.cuh"
 #include "KernelMemShared.cuh"
 #include "KernelMemGlobal.cuh"
+#include "KernelMultiBlock.cuh"
 #include "GPUCarasteristic.h"
 #include <conio.h>
 #include <Windows.h>

@@ -1,16 +1,16 @@
 #include "KernelMemGlobal.cuh"
 /*
-Kernel de ejecucion con memoria cOMPRATIDA TESELaDA Y COALECENCIA.
+	Kernel de ejecucion con memoria glogal.
 
-- Tab		= Un copia del tablero dejuego pasada al device.
-- numThread = Numero de hilos del tablero.
-- row		= fila de ficha que va a realizar la jugada.
-- col		= columna en la que se encuentra la ficha que va a reaalizar la jugada.
-- dirrecion = direcion de la jugada pudiendo ser:
-|-> 10 = sup-izq.
-|-> 20 = inf-izq.
-|-> 11 = sup-dech.
-|-> 21 = inf-dech.
+	- Tab		= Un copia del tablero dejuego pasada al device.
+	- numThread = Numero de hilos del tablero.
+	- row		= fila de ficha que va a realizar la jugada.
+	- col		= columna en la que se encuentra la ficha que va a reaalizar la jugada.
+	- dirrecion = direcion de la jugada pudiendo ser:
+		|-> 10 = sup-izq.
+		|-> 20 = inf-izq.
+		|-> 11 = sup-dech.
+		|-> 21 = inf-dech.
 */
 __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col, int direcion) {
 	int ty = threadIdx.y;		// Identificador de hilo del eje Y.
@@ -26,14 +26,13 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 			int type_bom = Tab[ty * width + tx] % 10;										// Determinamos el tipo de bomaba de la que se trata.
 			bool isPacMan = false;															// la ficha se convierte en pacma cunado se encuentra una ficha contraria y se la come.
 			for (size_t i = 1; i <= ((type_bom > 2) ? type_bom : 1); i++) {
-				isBomtrasposeGlobalMem = false;	// Desactivamos las bombas de trasposicion para que su efecto solo dure una jugada.
 				/*
 					Determinamos si es error de jugada y se lo comunicamos al host o finaliza el
 					recorido de una bomba las bombas abazan tantas casillas en diagonal como va-
 					lor de su tipo o asta que se convierta en pacman coman o se encuentre los li-
 					mites del tablero os ata encontrar una ficha amiga.
 				*/
-				if (isCamaradaGlobal(i, movV, movH, Tab, width) && !isPacMan) {
+				if (isCamaradaGlobalMem(i, movV, movH, Tab, width) && !isPacMan) {
 					isPacMan = (Tab[(ty + (i * movH))* width + (tx + (i * movV))] != POS_TAB_JUEGO_EMPTY);								  // Determinamos si somos PacMAn
 					Tab[(ty + (i * movH))* width + (tx + (i * movV))] = Tab[(row + ((i - 1) * movH)) * width + (col +((i - 1) * movV))];  // Insertamos la ficha en la nueva posicion.
 					Tab[(ty + ((i - 1) * movH))* width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;								  // Ponemos en blanco la poscion previa de mi ficha.
@@ -47,7 +46,7 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 					if (isPacMan || ((posMov < 0) || (posMov > (width * width)))) {
 						switch (type_bom) {
 							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
-								purpleBom(Tab, movH, movV, width);
+								purpleBomGlobalMem(Tab, movH, movV, width);
 								printf(ANSI_COLOR_GREEN " BOM Purple, Radial BOM!!" ANSI_COLOR_RESET "\n");
 								Tab[(ty + ((i - 1) * movH)) * width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
 								break;
@@ -57,25 +56,28 @@ __global__ void DamasBomPlayGlobalMem(long *Tab, int numthread, int row, int col
 								Tab[(ty + ((i - 1) * movH)) * width + (tx + ((i - 1) * movV))] = POS_TAB_JUEGO_EMPTY;
 								break;
 						}
+						break; // Me parece un buena forma de optimizar el kerne para salir del bucle cuando el resto de ciclos no son nesesarios.
 					}
 				}
 			}
+			__syncthreads();
 			/*
 				Cargamos el contenido de las matrizes teselada (pre cargada)en nuestra matriz
 				resultante, ademas puede generar la bomba de trasposicion si esta es activada.
 			*/
-			Tab[(ty* width + tx)] = Tab[((isBomtrasposeGlobalMem) ? threadIdx.x : threadIdx.y) * width + ((isBomtrasposeGlobalMem) ? threadIdx.y : threadIdx.x)];
+			Tab[(ty * width + tx)] = Tab[((isBomtrasposeGlobalMem) ? threadIdx.x : threadIdx.y) * width + ((isBomtrasposeGlobalMem) ? threadIdx.y : threadIdx.x)];
+			isBomtrasposeGlobalMem = false;	// Desactivamos las bombas de trasposicion para que su efecto solo dure una jugada.
 		}
 	}
 }
 
-__device__ void yellowBom(long *Tab, int x, int y, int width) { // Si me da tiempo ago que rompa mas cosas ademas de acer la traspuesta
+__device__ void yellowBomGlobalMem(long *Tab, int x, int y, int width) { // Si me da tiempo ago que rompa mas cosas ademas de acer la traspuesta
 	if (isBomtrasposeGlobalMem) {
 
 	}
 }
 
-__device__ void purpleBom(long *Tab, int x, int y, int width) {
+__device__ void purpleBomGlobalMem(long *Tab, int x, int y, int width) {
 	long fichaInMov = Tab[x * width * y];
 	for (size_t i = 0; i < ((x > gridDim.x) ? 2 : 3); i++) {
 		int row = (y > gridDim.y) ? 0 : 1;
@@ -94,7 +96,7 @@ __device__ void purpleBom(long *Tab, int x, int y, int width) {
 	Determina si el movimiento cuando encuentra una ficha en su camino la puede comer si
 	no es ficha amiga si es ficha amiga movimiento no valido;
 */
-__device__ bool isCamaradaGlobal(int pos, int movV, int movH, long *Tab, int width) {
+__device__ bool isCamaradaGlobalMem(int pos, int movV, int movH, long *Tab, int width) {
 	bool isFriend = ((threadIdx.y + (pos * movH))* width + (threadIdx.x + (pos * movV)) != -1) &&
 					((threadIdx.y + (pos * movH))* width + (threadIdx.x + (pos * movV))  < (width * width));
 	if (isFriend) {
@@ -120,11 +122,12 @@ bool launchKernelMemGlobal(double numThread, long* tablero, int* jugada) {
 	setCudaMemcpyToDevice(tablero_cuda, tablero, ((int)numThread));			// Tranferimos el tablero a la GPU.
 	dim3 dimGrid_c(TAM_BLOCK, TAM_BLOCK);
 	dim3 dimBlock_c(numThread / TAM_TESELA, numThread / TAM_TESELA);
+	size_t global_mem = numThread * sizeof(int);
 	/*
 		Aqui empieza la fiesta con CUDA, y mi total y asoluta faltas de hora de sueño SORPRISE.
 		Heee en memoria GLOBAL.
 	*/
-	DamasBomPlayGlobalMem <<<dimGrid_c, dimBlock_c >>> (tablero_cuda, numThread, jugada[1] - 1, jugada[0] - 1, jugada[2]);
+	DamasBomPlayGlobalMem <<<dimGrid_c, dimBlock_c, global_mem>>> (tablero_cuda, numThread, jugada[1] - 1, jugada[0] - 1, jugada[2]);
 	setCudaMemcpyToHost(tablero, tablero_cuda, (int)numThread);			// Trasferimos el tablero del GPU al HOST.
 	cudaFree(tablero_cuda);												// Liberamos memoria llamamos al recolector de basura.
 	return false; // Pertenece a algo que no dio tiempo y es mostrar errores de jugada desde el kernel.

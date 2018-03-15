@@ -160,6 +160,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <CudaCompile Include="KernelMemGlobal.cu" />
     <CudaCompile Include="kernelMemShared.cu" />
+    <CudaCompile Include="KernelMultiBlock.cu" />
     <CudaCompile Include="tablero.cu" />
     <CudaCompile Include="main.cu" />
     <CudaCompile Include="UtilGPU.cu" />
@@ -168,6 +169,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="GPUCarasteristic.h" />
     <ClInclude Include="KernelMemGlobal.cuh" />
     <ClInclude Include="KernelMemShared.cuh" />
+    <ClInclude Include="KernelMultiBlock.cuh" />
     <ClInclude Include="main.cuh" />
     <ClInclude Include="Persistencia.h" />
     <ClInclude Include="tablero.cuh" />

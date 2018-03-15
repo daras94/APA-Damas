@@ -19,6 +19,6 @@ bool launchKernelMemShared(double numThread, long* tablero, int* jugada);
 
 // Funcion y metonos GPU
 __global__ void DamasBomPlayMemShared(long *tablero, int numthread, int row, int col, int direcion);
-__device__ bool isCamaradaShared(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]);
-__device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int y, int x);
-__device__ void yellowBom(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width);
+__device__ bool isCamaradaSharedMem(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]);
+__device__ void purpleBomSharedMem(long Tabs[TAM_TESELA][TAM_TESELA + 1], int y, int x);
+__device__ void yellowBomSharedMem(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width);

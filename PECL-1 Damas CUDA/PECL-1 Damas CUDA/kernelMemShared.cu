@@ -47,7 +47,7 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 					lor de su tipo o asta que se convierta en pacman coman o se encuentre los li-
 					mites del tablero os ata encontrar una ficha amiga.
 				*/
-				if (isCamaradaShared(i, movV, movH, Tabs) && !isPacMan) {
+				if (isCamaradaSharedMem(i, movV, movH, Tabs) && !isPacMan) {
 					isPacMan = (Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] != POS_TAB_JUEGO_EMPTY); // Determinamos si somos PacMAn
 					Tabs[threadIdx.y + (i * movH)][threadIdx.x + (i * movV)] = Tab[tx  * width + ty];			  // Insertamos la ficha en la nueva posicion.
 					Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	  // Ponemos en blanco la poscion previa de mi ficha.
@@ -62,7 +62,7 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 					if (isPacMan /*|| ((posMovH < 0) || (posMovV < 0)) || ((posMovH > gridDim.y) || (posMovV > gridDim.x))*/) {
 						switch (type_bom) {
 							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
-								purpleBom(Tabs, posMovH, posMovV);
+								purpleBomSharedMem(Tabs, posMovH, posMovV);
 								printf(ANSI_COLOR_GREEN " - BOM Purple, Radial BOM!!" ANSI_COLOR_RESET "\n");
 								Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	
 								break;
@@ -72,7 +72,7 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 								Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;	
 								break;		
 						}
-						break;
+						break; // Me parece un buena forma de optimizar el kerne para salir del bucle cuando el resto de ciclos no son nesesarios.
 					}
 				}
 			}			
@@ -86,13 +86,13 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 	}
 }
 
-__device__ void yellowBom(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width) { // Si me da tiempo ago que rompa mas cosas ademas de acer la traspuesta
+__device__ void yellowBomSharedMem(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width) { // Si me da tiempo ago que rompa mas cosas ademas de acer la traspuesta
 	if (isBomtrasposeSharedMem) {
-		
+		// por si da tempo a añadir mas cosas a esta bomaba.
 	}
 }
 
-__device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y) {
+__device__ void purpleBomSharedMem(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y) {
 	long fichaInMov = Tabs[x][y];
 	for (size_t i = 0; i < ((x > gridDim.x)? 3 : 4); i++) {
 		int row = (y > gridDim.y) ? 0 : 1;
@@ -111,7 +111,7 @@ __device__ void purpleBom(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y) {
 	Determina si el movimiento cuando encuentra una ficha en su camino la puede comer si
 	no es ficha amiga si es ficha amiga movimiento no valido;
 */
-__device__ bool isCamaradaShared(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]) {
+__device__ bool isCamaradaSharedMem(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]) {
 	bool isFriend = ((threadIdx.y + (pos * movH)) != -1) && ((threadIdx.x + (pos * movV)) != -1) &&
 				    ((threadIdx.y + (pos * movH)) < gridDim.y) && ((threadIdx.x + (pos * movV)) < gridDim.x);
 	if (isFriend) {

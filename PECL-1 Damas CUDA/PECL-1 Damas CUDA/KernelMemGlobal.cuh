@@ -20,6 +20,6 @@ bool launchKernelMemGlobal(double numThread, long* tablero, int* jugada);
 
 // Funcion y metonos GPU
 __global__ void DamasBomPlayGlobalMem(long *tablero, int width, int row, int col, int direcion);
-__device__ bool isCamaradaGlobal(int pos, int movV, int movH, long *Tab, int width);
-__device__ void purpleBom(long *Tab, int y, int x, int width);
-__device__ void yellowBom(long *Tab, int x, int y, int width); 
+__device__ bool isCamaradaGlobalMem(int pos, int movV, int movH, long *Tab, int width);
+__device__ void purpleBomGlobalMem(long *Tab, int y, int x, int width);
+__device__ void yellowBomGlobalMem(long *Tab, int x, int y, int width);

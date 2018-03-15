@@ -14,6 +14,9 @@
     <CudaCompile Include="KernelMemGlobal.cu">
       <Filter>Juego\kenels</Filter>
     </CudaCompile>
+    <CudaCompile Include="KernelMultiBlock.cu">
+      <Filter>Juego\kenels</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.cuh" />
@@ -33,6 +36,9 @@
       <Filter>Juego\kenels</Filter>
     </ClInclude>
     <ClInclude Include="KernelMemGlobal.cuh">
+      <Filter>Juego\kenels</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelMultiBlock.cuh">
       <Filter>Juego\kenels</Filter>
     </ClInclude>
   </ItemGroup>
