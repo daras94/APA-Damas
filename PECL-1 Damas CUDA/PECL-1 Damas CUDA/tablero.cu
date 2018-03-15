@@ -1,14 +1,14 @@
 ﻿#include "tablero.cuh"
 
 /*
-	Recupera las carasteristicas nesesarias para realizar la configuracion del tablero.
+	Recupera las carrasteristicas nesesarias para realizar la configuracion del tablero.
 
-	- devian	 = recibe un entero con el id de la GPU que se va a usar para realizar la configuracion.
-	- deviceProp = recibe un struct para almacenar las carasteristicas de la GPU.
-	- myConfGpu  = struct pasado por referencia para almacenar las informacion de la gpu que nos interesa.
+	- devian	 = recibe un entero con la el id de la GPU que se va a usar para realizar la configuracion.
+	- deviceProp = recibe un struct para almacenar las carrasteristicas de la GPU.
+	- myConfGpu  = truckt pasado por referencia para almacenar las informacion de la gpu ge nos interesa.
 */
 void getCofigPlay(int devian, cudaDeviceProp *deviceProp, info_gpu *myConfGpu) {
-	cudaSetDevice(devian);														// Establecemos con que GPU queremos realizar la configuracion en funcion de devian.
+	cudaSetDevice(devian);														// Establecemos con que GPU queremos realizar la configuracion en funcion de disponer.
 	cudaGetDeviceProperties(deviceProp, devian);
 	myConfGpu->numThreadMaxPerSM = deviceProp->maxThreadsPerMultiProcessor;
 	myConfGpu->numThreadMasPerBlock = deviceProp->maxThreadsPerBlock;
@@ -21,14 +21,14 @@ void getCofigPlay(int devian, cudaDeviceProp *deviceProp, info_gpu *myConfGpu) {
 }
 
 /*
-	Metodo que genera 3 posibles configuraciones de la dimensiones de la tarjeta grafica
-	en funcion de la carateristicas de la GPU que poseea el usuario.
+	Medodo que genera 3 posbles configuraciones de la dimeciones de la trageta grafica
+	en funcion de la carateristicas de la GPU que posea el usuario.
 		
-		- devProp       = puntero a struct el cual contiene la informacion de la GPU es 
+		- devProp       = puntero a struc el cual contiene la informacion de la GPU es 
 					      de la arquitectura de CUDA.
-		- myConfGpu     = struct declarado en la cabecera de esta clase el cual usamos 
+		- myConfGpu     = struck declarado en la cabecera de esta clase el cul usamos 
 		                  para almacenar informacion concreta de la GPU.
-		- deviceCurrent = Id de la GPU que actualmente tenemos seleccionada como principal.
+		- deviceCurrent = Id de la GPU que actualmente tenemos selecionada como principal.
 */
 double setGpuForPlayAuto(cudaDeviceProp *devProp,  info_gpu *myConfGpu, int deviceCurrent) {
 	double *dimTamblero, numThread;
@@ -61,14 +61,14 @@ double setGpuForPlayAuto(cudaDeviceProp *devProp,  info_gpu *myConfGpu, int devi
 }
 
 /*
-	Metodo que genera 3 posibles configuraciones de las dimensiones de la tarjeta grafica
-	en funcion de la carateristicas de la GPU que poseea el usuario.
+	Medodo que genera 3 posbles configuraciones de la dimeciones de la trageta grafica
+	en funcion de la carateristicas de la GPU que posea el usuario.
 
-		- devProp       = puntero a struct el cual contiene la informacion de la GPU que es
+		- devProp       = puntero a struc el cual contiene la informacion de la GPU es
 						  de la arquitectura de CUDA.
-		- myConfGpu     = struct declarado en la cabecera de esta clase la cual usamos
+		- myConfGpu     = struck declarado en la cabecera de esta clase el cul usamos
 						  para almacenar informacion concreta de la GPU.
-		- deviceCurrent = id de la GPU que actualmente tenemos seleccionada como principal.
+		- deviceCurrent = Id de la GPU que actualmente tenemos selecionada como principal.
 */
 double setGpuForPlayManual(cudaDeviceProp *devProp, info_gpu *myConfGpu, int deviceCurrent) {
 	string imput = { NULL }; int  cont = 0; double dim = 0;
@@ -86,8 +86,8 @@ double setGpuForPlayManual(cudaDeviceProp *devProp, info_gpu *myConfGpu, int dev
 	cout << " - Introduca el numero las filas y columnas con el formato Ej: 16x16 (" ANSI_COLOR_GREEN "0 para salir" ANSI_COLOR_RESET "): ";
 	cin >> imput;		// Entrada de texto por teclado.
 	smatch match;
-	regex  reg_expre{R"(\d{1,2}x\d{1,2})"};								// Expresion regular para las filas y columnas.
-	bool found = regex_match(imput, match, reg_expre);					// Comparacion que busca un expresion de tipo fila:columna:direccion
+	regex  reg_expre{R"(\d{1,2}x\d{1,2})"};								// Epresion regular para las filas y columnas.
+	bool found = regex_match(imput, match, reg_expre);					// Coparacion que busca un expresion de tipo fila:columna:direccion
 	if (found) {
 		int *jugada = getRowAndColumn(imput, myConfGpu -> numThreadMasPerBlock, "x", 2);
 		if (sizeof(jugada) < NUM_DIMENSION_TAB) {
@@ -106,7 +106,7 @@ double setGpuForPlayManual(cudaDeviceProp *devProp, info_gpu *myConfGpu, int dev
 }
 
 /*
-	Establece la dificultad de la partida.
+	Establece la dificultade la partida.
 */
 int setDificultad() {
 	int  dificultad;
@@ -132,7 +132,7 @@ int setDificultad() {
 }
 
 /* 
-	Generamos el tablero con un números de bombas aleatorios en función de la dificultad.
+	Generamos el tablero con un números de bonbas aleatorios en función de la dificultad.
 */
 long *generarTablero(double numThread, int dificultad) {
 	int cont = 0, tam = (((int)numThread) / TAM_TESELA);
@@ -147,7 +147,7 @@ long *generarTablero(double numThread, int dificultad) {
 	srand(time(NULL));
 	for (size_t i = 0; i < tam; i++) {
 		for (size_t j = 0; j < tam; j++) {
-			int bom = rand() % (dificultad + 2);				    // Genera bombas en funcion de las dificultad seleccionada.
+			int bom = rand() % (dificultad + 1);				    // Gennera Bombas en funcion de las dificultad selecionada.
 			tablero[(i * tam + j)] = (((i + j + ((i > numRowFicha) ? 0 : 1))% 2 == 0)? ((i < numRowFicha)? 31 + bom : POS_TAB_JUEGO_EMPTY) : ((i >= (tam - numRowFicha))? 22 + bom : POS_TAB_JUEGO_EMPTY));
 		}	
 	}
@@ -155,7 +155,7 @@ long *generarTablero(double numThread, int dificultad) {
 }
 
 /* 
-	Funcion que imprime el numero de columnas que va a tener el tablero
+	Función que imprime el número de columnas que va a tener el tablero
 	para que sea más facil elegir piezas.
 */
 void imprimirColumnas(double numThread) {
@@ -174,8 +174,8 @@ void imprimirTablero(long *tablero, double numThread) {
 	imprimirColumnas(numThread);
 	for (size_t i = 0; i < numThread / TAM_TESELA; i++) {
 		cout << setw(4) << i+1 << setw(3) << "-" << setw(3) << "";
-		for (size_t k = 0; k < numThread/TAM_TESELA; k++) {							// Damos color en función del número a imprimir
-			int background = ((i + k) % 2 == 0) ? COLOR_BLANCO : COLOR_NEGRO;		// Color que construye el tablero.
+		for (size_t k = 0; k < numThread/TAM_TESELA; k++) {							// Damos color en función del número imprimir
+			int background = ((i + k) % 2 == 0) ? COLOR_BLANCO : COLOR_NEGRO;		// Color que contrulle el tablero.
 			int bloque = tablero[(i * (((int)numThread) / TAM_TESELA) + k)];
 			//if (bloque < NUM_FICHAS) {											// Calculamos el color de la casilla.
 				int color = COLOR_TABLERO(background, (new int[NUM_FICHAS] {background, COLOR_ROJO, COLOR_AZUL_LIGHT, COLOR_VERDE, COLOR_PURPURA, COLOR_AMARILLO, COLOR_AGUAMARINA, COLOR_PURPURA_LIGHT})[bloque % 10]); 
@@ -188,11 +188,14 @@ void imprimirTablero(long *tablero, double numThread) {
 }
 
 /*
-	Metodo que se encarga de gestionar la partida, salvar la partida con persistencia
-	y lanzar el kernel adecuado que el jugador haya selecionado.
+	Medodo que se encarga de gestionar la partida, salvar la partida con persistencia
+	y lanzar el kernel adecuado que el jugador aya selecionado.
 */ 
-void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificultad) {
-	long *tablero = generarTablero(numThread, dificultad);
+void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificultad, bool tipo_carga) {
+	long *tablero = ((tipo_carga) ? generarTablero(numThread, dificultad) : cargarPartida());
+	if (!tipo_carga) {
+		numThread = sizeof(tablero);
+	}
 	long cont = 0;
 	string input = { NULL };
 	do {
@@ -204,21 +207,21 @@ void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificu
 		imprimirTablero(tablero, numThread);
 		cout << "  " << setw(87) << "  " << endl;
 		cout << "/*  -----------------------------------------------------------------------------------  */" << endl;
-		cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Jugada con el formato X:Y:D (X = columna, Y = fila, " << setw(28) << " */" << endl;
+		cout << "/*  - " << ANSI_COLOR_RED "AVISO: " ANSI_COLOR_RESET "Jugada con el formato X:Y:D (X = column, Y = row, " << setw(28) << " */" << endl;
 		cout << "/*    " << setw(72) << " D = (10 = sup-izq, 20 = inf-izq, 11 = sup-dech, 21 = inf-dech)). "			   << setw(13) << " */" << endl;
 		cout << "/*****************************************************************************************/" << endl;
 		teclado:
 		cout << " - Realice su jugada (" ANSI_COLOR_GREEN "0 para salir de la partida s para guardar la partida." ANSI_COLOR_RESET "): ";
 		cin >> input;															// Entrada de texto por teclado.
 		smatch match;
-		regex  reg_expre{R"(\d{1,2}:\d{1,2}:(1|2){1}(0|1){1})"};				// Expresion regular para las filas y columnas.
-		bool found = regex_match(input, match, reg_expre);						// Comparacion que busca un expresion de tipo fila:columna:direccion
+		regex  reg_expre{R"(\d{1,2}:\d{1,2}:(1|2){1}(0|1){1})"};				// Epresion regular para las filas y columnas.
+		bool found = regex_match(input, match, reg_expre);						// Coparacion que busca un expresion de tipo fila:columna:direccion
 		if (found) {
 			int *jugada = getRowAndColumn(input, numThread, ":", NUM_DIMENSION);
 			if (sizeof(jugada) < NUM_DIMENSION_TAB) {
 				ERROR_MSS("Error en la columna o fila introducida.");
 				goto teclado;
-			} else {															// Invocamos al metodo de lanzamiento de los kernels
+			} else {															// Inbocamos al metodo de lanzamiento de los kernels
 				bool error_play = launchKernel(typeKernel, numThread, tablero, jugada);
 				if (error_play) {
 					ERROR_MSS("El movimento realizado no es valido.");
@@ -228,39 +231,35 @@ void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificu
 				cont++;
 			}
 		} else {
-			switch ((char)&input) {
-				case 's':									// Para la persistencia desde la partida.
-					
-					break;
-				default:									// Caracteres no validos
-					if (input != "0") {
-						ERROR_MSS("Error carrater o movimiento introducido no valido no valida.");
-						goto teclado;
-					}
-					break;
+			if (input == "s") {		// Para la persistencia desde la partida.
+				guardarPartida(tablero, sqrt(numThread), sqrt(numThread));
+
+			} else if (input != "0") {
+				ERROR_MSS("Error carrater o movimiento introducido no valido no valida.");
+				goto teclado;
 			}
 		}
 	} while (input != "0");
 }
 
 /*
-	Metodo que invoca el kernel segun el tipo de kernel que se quiera ejecutar.
+	Metodo Que inboca el kernel segun el tipo de kernel que se quiera ejecutar.
 
-		- typeKernel = entero que indica tipo de kernel a lanzar x Block, Mem_Shared or Bloques y Mem_Global.
-		- mumThread  = recibe el numero de thread para realizar la configuracion de juego.
+		- typeKernel = Entero que indica tipo de kernel a lanzar x Block, Mem_Shared or Bloques y Mem_Global.
+		- mumThread  = recibe el numeroi de thread para realizar la configuracion de juego.
 		- tablero	 = Recibe el tablero de juego generado por el host
 		- jugada	 = Recibe la jugada realizada por algun jugador.
 */
 bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada) {
 	bool isErrorJugada = false;
 	switch (typeKernel) {
-		case 1:		// Memoria compartida con coalescencia y teselada.
+		case 1:		// Memoria Compartida Con Colesencia y Teselada.
 			isErrorJugada = launchKernelMemShared(numThread, tablero, jugada);
 			break;
-		case 2:		// Por bloques.
+		case 2:		// Por Bloques.
 			isErrorJugada = launchKernelMultyBlock(numThread, tablero, jugada);
 			break;
-		case 3:		// Por bloques memoria global.
+		case 3:		// Por Bloques Memoria global.
 			isErrorJugada = launchKernelMemGlobal(numThread, tablero, jugada);
 			break;
 	}
@@ -268,9 +267,9 @@ bool launchKernel(int typeKernel, double numThread, long* tablero, int* jugada) 
 }
 
 /*
-	Realiza el separado de los valores de la jugada pasada en el formato C:F:D 
+	Realiza el Separado de los valores de la jugada pasada en el formato C:F:D 
 	(C = Columna, F = Fila, D = Direcion) o la configuracion de filas columnas
-	y devuelve la jugada como un array de enteros. 
+	y debuelve la jugada como un array de enteros. 
 */
 int *getRowAndColumn(string jug, double numThread, string delimiter, int num_parametres) {
 	string aux = jug + delimiter;

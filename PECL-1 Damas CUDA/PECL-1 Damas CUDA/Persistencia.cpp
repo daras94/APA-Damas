@@ -1,12 +1,11 @@
 #include "Persistencia.h"
 
 
-void guardarPartida(int *tablero, int filas, int columnas, int dificultad) {
+void guardarPartida(long *tablero, int filas, int columnas) {
 	ofstream doc;
 	doc.open("partida.txt");
 	doc << filas << "\n";
 	doc << columnas << "\n";
-	doc << dificultad << "\n";
 	for (int i = 0; i < filas * columnas; i++) {
 		doc << tablero[i] << " ";
 	}
@@ -15,11 +14,11 @@ void guardarPartida(int *tablero, int filas, int columnas, int dificultad) {
 	cout << "Guardado correctamente.\n\n";
 }
 
-void cargarPartida() {
+long *cargarPartida() {
 	const string fichero = "partida.txt";
 	ifstream leer;
 	leer.open(fichero.c_str());
-	int  d, *tablero, *tAux;
+	long  d, *tablero, *tAux;
 	int i = 0;
 	int n = 48;
 	int f = 0;
@@ -55,12 +54,13 @@ void cargarPartida() {
 	}
 
 
-	tablero = new int[f*c];
-	tAux = new int[f*c];
+	tablero = new long[f*c];
+	tAux = new long[f*c];
 	for (int i = 0; i < f * c; i++) {
 		leer.getline(fila, 80, ' ');
 		tablero[i] = (int)fila[0] - 48;
 	}
 	leer.close();
+	return tablero;
 	//modoManual(tablero, f, c, d);
 }

@@ -1,7 +1,7 @@
 #include "KernelMemShared.cuh"
 
 /*
-	Kernel de ejecucion con memoria compartida teselada y coalescencia.
+	Kernel de ejecucion con memoria cOMPRATIDA TESELaDA Y COALECENCIA.
 
 		- Tab		= Un copia del tablero dejuego pasada al device.
 		- numThread = Numero de hilos del tablero.
@@ -14,9 +14,9 @@
 			|-> 21 = inf-dech.
 */
 __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col, int direcion) {
-	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];	// Matriz teselada en memoria compartida.
-	int Row = blockIdx.y * gridDim.y + threadIdx.y;		// Calculamos la fila de la matriz teselada.
-	int Col = blockIdx.x * gridDim.x + threadIdx.x;		// Calculamos la columna de la matriz teselada.
+	__shared__ long Tabs[TAM_TESELA][TAM_TESELA + 1];   // Matriz teselada en memoria compartida.
+	int Row = blockIdx.y * gridDim.y + threadIdx.y;	// Calculamos la fila de la matriz teselada.
+	int Col = blockIdx.x * gridDim.x + threadIdx.x;	// Calculamos la columna de la matriz teselada.
 	int width = numThread / TAM_TESELA;					// Calculamos el tamaño en funcion del ancho.
 	/*
 		Para evitar las violaciones de acceso esas que la version 5.3 de nising daban como
@@ -94,7 +94,7 @@ __device__ void yellowBomSharedMem(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA +
 
 __device__ void purpleBomSharedMem(long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y) {
 	long fichaInMov = Tabs[x][y];
-	for (size_t i = 0; i < ((x > gridDim.x)? 3 : 4); i++) {
+	for (size_t i = 0; i < ((x > gridDim.x) ? 3 : 4); i++) {
 		int row = (y > gridDim.y) ? 0 : 1;
 		for (size_t j = 0; j < 2; j++) {
 			int victimas = Tabs[(y + row) + i][(x + (new int[2]{ 1, -1 })[j])];

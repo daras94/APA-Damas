@@ -6,11 +6,10 @@
 int main() {
 	SetConsoleTitle("Damas BOM for CUDA");
 	getCofigPlay(selectGPU, &devProp, &infoMyGPU);						// obtenemos los parametros de la gpu para realizar la configuracion de la gpu.
-	int opc,  dificultad;										        // Es el valor de la opcion a usar y la dificultad de juego. 
+	int opc,  dificultad;										        // Es el valor de la opcion a usar y la doficultad de juego. 
 	double numThread;													// El numero de hilos totales de la matriz escogida.
-	long *gui_tablero;
 	do {
-		system("cls");					// Limpiamos el prompt
+		system("cls");					// Limpiamos el pront
 		cout << "/***************************************************************************************/" << endl;
 		cout << "/*" << setw(35) << " ---> { " << ANSI_COLOR_CYAN " MENU: Damas CUDA " ANSI_COLOR_RESET << " } <--- " << setw(26) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
@@ -43,25 +42,31 @@ int main() {
 				}
 				dificultad = setDificultad();
 				if (dificultad != 0) {
-					playDamas(opc, numThread, &infoMyGPU, dificultad);
+					playDamas(opc, numThread, &infoMyGPU, dificultad, true);
 				}
 				break;
 			case 5:
-				numThread = setGpuForPlayAuto(&devProp, &infoMyGPU, selectGPU);	// Modo Automatico.
-				dificultad = setDificultad();
-				gui_tablero = generarTablero(numThread, dificultad);
-				iniciarInterfaz(numThread, gui_tablero);
+
 				break;
+			
 			case 6: 
+
+				break;
 			case 7:
 				echoCarGPUs(selectGPU, &devProp);
 				if (opc == 7) {
-					cudaDeviceProp devShow;								// struct de carasteristicas de la GPU.
+					cudaDeviceProp devShow;								// struct de carrasteristicas de la GPU.
 					selectGpuCurrent(&devShow, &selectGPU);
 					getCofigPlay(selectGPU, &devProp, &infoMyGPU);		// Obtenemos los parametros de la gpu para realizar la configuracion de la gpu.
 				} else {
 					system("pause");
 				}
+				break;
+			case 8:
+				cout << "/***************************************************************************************/" << endl;
+				cout << " - Selecione un kernel ( Mem-Shared = 1, Block = 2 y Mem & Block = 3): ";
+				cin >> opc;
+					playDamas(opc, 0, &infoMyGPU, 0, false);
 				break;
 			default:
 				if (opc != 0) {
@@ -70,7 +75,7 @@ int main() {
 				break;
 		}
 	} while (opc != 0);
-	cout << ANSI_COLOR_GREEN  "\n - Has salido del juego amigo espero que te guste CUDA ya que este juego lo patrocinan CUDA y Nvidia !!" ANSI_COLOR_RESET << endl;
-	//Sleep(1000);
+	cout << ANSI_COLOR_GREEN  "\n - Has Salido del juego Amigo espero que te guste CUDA ya que este juego lo patrocinan CUDA y Nvidia !!" ANSI_COLOR_RESET << endl;
+	Sleep(1000);
 	return EXIT_SUCCESS;
 }

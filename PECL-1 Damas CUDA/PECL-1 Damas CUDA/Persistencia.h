@@ -8,5 +8,5 @@
 using namespace std;
 
 // Declaracion de funciones y metodos.
-void guardarPartida(int *tablero, int nFilas, int nCols, int nDificultad);
-void cargarPartida();
+void guardarPartida(long *tablero, int nFilas, int nCols);
+long *cargarPartida();

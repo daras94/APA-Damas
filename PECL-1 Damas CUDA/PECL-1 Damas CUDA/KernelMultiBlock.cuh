@@ -21,5 +21,5 @@ bool launchKernelMultyBlock(double numThread, long* tablero, int* jugada);
 // Funcion y metonos GPU
 __global__ void DamasBomPlayMultiBlock(long *tablero, int width, int row, int col, int direcion);
 __device__ bool isCamaradaMultyBlock(int col, int row, int pos, int movV, int movH, long *Tab, int width);
-__device__ void purpleBomMultyBlock(int Col, int Row, long *Tab, int y, int x, int width);
-__device__ void yellowBomMultyBlock(long *Tab, int x, int y, int width);
+__device__ void purpleBomMultyBlock(int Col, int Row, long *Tab, int width);
+__device__ void roseBomMultyBlock(long *Tab, int x, int y, int width);
