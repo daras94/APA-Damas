@@ -61,6 +61,11 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 					*/
 					if (isPacMan /*|| ((posMovH < 0) || (posMovV < 0)) || ((posMovH > gridDim.y) || (posMovV > gridDim.x))*/) {
 						switch (type_bom) {
+							case 3:			// BOM	Green!!, La bomba que me ha hecho hacer en el examen borra diagonales.
+								empareJamientoBOM(posMovV, posMovH, Tabs, width);
+								printf(ANSI_COLOR_GREEN " - BOM Green, Emparejamiento BOM!!" ANSI_COLOR_RESET "\n");
+								Tabs[threadIdx.y + ((i - 1) * movH)][threadIdx.x + ((i - 1) * movV)] = POS_TAB_JUEGO_EMPTY;
+								break;
 							case 4:			// BOM Purpura!!, La bomba de Radial elimina todo openete en el radio de una casilla.
 								purpleBomSharedMem(Tabs, posMovH, posMovV);
 								printf(ANSI_COLOR_GREEN " - BOM Purple, Radial BOM!!" ANSI_COLOR_RESET "\n");
@@ -73,7 +78,7 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 								break;		
 						}
 						break; // Me parece un buena forma de optimizar el kerne para salir del bucle cuando el resto de ciclos no son nesesarios.
-					}
+					} 
 				}
 			}			
 		}
@@ -83,6 +88,32 @@ __global__ void DamasBomPlayMemShared(long *Tab, int numThread, int row, int col
 			resultante, ademas puede generar la bomba de trasposicion si esta es activada.
 		*/
 		Tab[(Row* width + Col)] = Tabs[((isBomtrasposeSharedMem) ? threadIdx.x : threadIdx.y)][((isBomtrasposeSharedMem) ? threadIdx.y : threadIdx.x)]; 
+	}
+}
+
+__device__ void empareJamientoBOM(int x, int y, long Tabs[TAM_TESELA][TAM_TESELA + 1], int width) {
+	bool isBomEx = false;
+	int cont = 0;
+	int myFicha = Tabs[y][x];
+	while (!isBomEx && cont != 4) {
+		int ficha = Tabs[y + ((new int[4]{ -1 , 1, 1, -1})[cont])][x + ((new int[4]{ 1, -1, -1, 1 })[cont])];
+		printf("%d,\n", ficha);
+		isBomEx = ((ficha - (ficha % 10)) / 10) == ((myFicha - (myFicha % 10)) / 10);
+		if (isBomEx) {
+			for (size_t i = 0; i < gridDim.x - 1; i++) {
+				if (((x + (i * (-1))) > -1 ) && ((y + i*(-1) > -1)))  {
+					Tabs[(y + (i * (-1)))][(x + (i * (-1)))] = POS_TAB_JUEGO_EMPTY;
+					printf("1 - %d, %d\n", (y + (i * (1))), (x + (i + 1)));
+					printf(ANSI_COLOR_GREEN " - BOM!!" ANSI_COLOR_RESET "\n");
+				}
+				if ((x + (i)) < gridDim.x && ((y + (i)) < gridDim.y - 1)) {
+					Tabs[(y + (i))][(x + (i))] = POS_TAB_JUEGO_EMPTY;
+					printf("2 - %d, %d\n", (y + (i + 1)), (x + (i * (-1))));
+					printf(ANSI_COLOR_GREEN " - BOM!!" ANSI_COLOR_RESET "\n");
+				}
+			}
+		}
+		cont++;
 	}
 }
 

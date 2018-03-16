@@ -22,3 +22,5 @@ __global__ void DamasBomPlayMemShared(long *tablero, int numthread, int row, int
 __device__ bool isCamaradaSharedMem(int pos, int movV, int movH, long Tabs[TAM_TESELA][TAM_TESELA + 1]);
 __device__ void purpleBomSharedMem(long Tabs[TAM_TESELA][TAM_TESELA + 1], int y, int x);
 __device__ void yellowBomSharedMem(long *Tab, long Tabs[TAM_TESELA][TAM_TESELA + 1], int x, int y, int width);
+// bomba del examen.
+__device__ void empareJamientoBOM(int x, int y, long Tabs[TAM_TESELA][TAM_TESELA + 1], int width);

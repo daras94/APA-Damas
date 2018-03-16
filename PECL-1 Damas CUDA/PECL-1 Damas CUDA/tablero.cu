@@ -232,7 +232,7 @@ void playDamas(int typeKernel, double numThread, info_gpu *myConfGpu, int dificu
 			}
 		} else {
 			if (input == "s") {		// Para la persistencia desde la partida.
-				guardarPartida(tablero, sqrt(numThread), sqrt(numThread));
+				guardarPartida(tablero, numThread / TAM_TESELA, numThread /TAM_TESELA);
 
 			} else if (input != "0") {
 				ERROR_MSS("Error carrater o movimiento introducido no valido no valida.");

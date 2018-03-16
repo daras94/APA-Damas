@@ -21,6 +21,7 @@ int main() {
 		cout << "/*  " ANSI_COLOR_MAGENTA "5" ANSI_COLOR_RESET ") - Iniciar partida damas interfaces grafica."							       << setw(39) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "6" ANSI_COLOR_RESET ") - Ver Carateristicas del Hardware de que dispones."					       << setw(30) << "*/" << endl;
 		cout << "/*  " ANSI_COLOR_MAGENTA "7" ANSI_COLOR_RESET ") - Selecionar configuracion de otra GPU disponible."                          << setw(45) << "*/" << endl;
+		cout << "/*  " ANSI_COLOR_MAGENTA "8" ANSI_COLOR_RESET ") - Cargar Partida desde fichero."											   << setw(55) << "*/" << endl;
 		cout << "/*" << setw(87) << "*/" << endl;
 		cout << "/***************************************************************************************/" << endl;
 		fotterCarGPU(&devProp, selectGPU);
@@ -46,12 +47,12 @@ int main() {
 				}
 				break;
 			case 5:
-
+				dificultad = setDificultad();
+				if (dificultad != 0) {
+					playDamas(opc, numThread, &infoMyGPU, dificultad, true);
+				}
 				break;
-			
 			case 6: 
-
-				break;
 			case 7:
 				echoCarGPUs(selectGPU, &devProp);
 				if (opc == 7) {
